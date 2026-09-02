@@ -395,6 +395,24 @@ export type SessionEvent<T extends SessionEventType = SessionEventType> = {
 
 来源：[`packages/compaction/compaction/src/types.ts:34`](../packages/compaction/compaction/src/types.ts)
 
+### `diagram/*`
+
+<a id="diagramsaved--log-only"></a>
+
+#### `diagram/saved` — 仅日志
+
+```ts persistence-catalog
+/** One canvas save through the diagram Remote; log-only UI state, never derived history. */
+'diagram/saved': {
+  /** Workspace path written. */
+  path: string
+  /** Number of elements in the saved scene. */
+  elementCount: number
+}
+```
+
+来源：[`packages/drawing/diagram/src/types.ts:52`](../packages/drawing/diagram/src/types.ts)
+
 ### `feedback/*`
 
 <a id="feedbackrecord--log-only"></a>

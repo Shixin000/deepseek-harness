@@ -48,6 +48,7 @@ import CordisHostRunner from '@deepseek-ai/dsh-cordis-host-runner'
 import * as ToolCordis from '@deepseek-ai/dsh-tool-cordis'
 import * as ToolFs from '@deepseek-ai/dsh-tool-fs'
 import * as ToolFsSearch from '@deepseek-ai/dsh-tool-fs-search'
+import * as ToolDiagram from '@deepseek-ai/dsh-diagram'
 import * as ToolStrReplaceEditor from '@deepseek-ai/dsh-tool-str-replace-editor'
 import TerminalSessionService from '@deepseek-ai/dsh-terminal'
 import * as ToolPty from '@deepseek-ai/dsh-tool-terminal'
@@ -345,6 +346,22 @@ const TOOL_PACKAGES: ToolPackage[] = [
     },
     note:
       'glob and grep are unconditional discovery tools that spawn the packaged ripgrep binary (`@vscode/ripgrep`) through ctx.subprocess as ordinary foreground calls (never background jobs) — no host `rg` install and no shell layer. The catalog uses `sampleOverCapGlobResults: true`; deployments must choose that behavior explicitly. Capped results save the complete formatted list through the optional ctx.spillStore backend; returned locators are follow-up-readable/searchable when the backend exposes local paths in co-located deployments.',
+  },
+  {
+    pkg: '@deepseek-ai/dsh-diagram',
+    dir: 'diagram',
+    source: 'packages/drawing/diagram/src/index.ts',
+    requires: ['ctx.tools', 'ctx.fs', 'ctx.systemPrompt'],
+    writes: [
+      'tool/call', 'fs/write-intent for the diagram write', 'fs/observed after the write', 'tool/result',
+      'fs/observed (present) for a diagram_read',
+    ],
+    async mount(ctx) {
+      await ctx.plugin(LocalFileSystem)
+      await ctx.plugin(ToolDiagram)
+    },
+    note:
+      'Writes deterministic Excalidraw `.excalidraw` documents from a validated shape spec; the expanded elements ride only in the replayable `presentationMeta` projection (bounded by `maxMetaBytes`), never in model-facing content. The `diagram_read` companion tool returns a bounded structural summary (types, geometry, labels, connector points) of an existing document, truncating at 200 elements with an explicit total.',
   },
   {
     pkg: '@deepseek-ai/dsh-tool-terminal',

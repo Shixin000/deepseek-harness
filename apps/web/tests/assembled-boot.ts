@@ -211,6 +211,22 @@ export function installAssembledBootEnv(): void {
       top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0, x: 0, y: 0, toJSON: () => ({}),
     })
   }
+  // jsdom implements no 2d canvas context: Excalidraw (bundled into the
+  // diagram whiteboard plugin) probes `'filter' in canvas.getContext('2d')`
+  // at module scope, so the assembled bundles need a context object, not a
+  // null, to load at all.
+  // jsdom implements no 2d canvas context: Excalidraw (bundled into the
+  // diagram whiteboard plugin) probes `'filter' in canvas.getContext('2d')`
+  // at module scope, so the assembled bundles need a context object, not a
+  // null, to load at all.
+  const probeContext = HTMLCanvasElement.prototype.getContext.call(document.createElement('canvas'), '2d')
+  if (probeContext === null) {
+    // The real signature is overloaded per context id; the stub only needs to
+    // satisfy the module-scope probe, so the loose callable cast is deliberate.
+    HTMLCanvasElement.prototype.getContext = (function getContext(this: HTMLCanvasElement): CanvasRenderingContext2D | null {
+      return {} as CanvasRenderingContext2D
+    }) as typeof HTMLCanvasElement.prototype.getContext
+  }
   beforeEach(() => {
     localStorage.clear()
     // The locale service derives its provisional locale from the browser and

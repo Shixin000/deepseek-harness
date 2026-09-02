@@ -497,6 +497,24 @@ export interface Config {
 
 Source: [`packages/credentials/credentials-local/src/index.ts:64`](../packages/credentials/credentials-local/src/index.ts)
 
+<a id="deepseek-aidsh-diagram"></a>
+
+## `@deepseek-ai/dsh-diagram`
+
+Requires: `tools` · `fs` · `systemPrompt`
+
+```ts config-catalog
+/** Plugin config; the schema supplies the defaults. */
+export interface Config {
+  /** Maximum number of spec shapes one call accepts. */
+  maxElements?: number
+  /** Maximum serialized bytes of the presentation projection kept for replay. */
+  maxMetaBytes?: number
+}
+```
+
+Source: [`packages/drawing/diagram/src/index.ts:35`](../packages/drawing/diagram/src/index.ts)
+
 <a id="deepseek-aidsh-e2b"></a>
 
 ## `@deepseek-ai/dsh-e2b`
@@ -2513,7 +2531,7 @@ export interface Config {
 }
 ```
 
-Source: [`packages/core/system-prompt/src/index.ts:237`](../packages/core/system-prompt/src/index.ts)
+Source: [`packages/core/system-prompt/src/index.ts:239`](../packages/core/system-prompt/src/index.ts)
 
 <a id="deepseek-aidsh-terminal-bash"></a>
 
@@ -3348,6 +3366,8 @@ These load from a `cordis.yml` entry with no `config:` block; they declare no co
 - `@deepseek-ai/dsh-client-ui-conversation` ([`packages/client/ui-conversation/src/index.ts`](../packages/client/ui-conversation/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-cordis` ([`packages/extensions/ui-cordis/src/index.ts`](../packages/extensions/ui-cordis/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-deliverables` — requires `systemPrompt` ([`packages/client/ui-deliverables/src/index.ts`](../packages/client/ui-deliverables/src/index.ts))
+- `@deepseek-ai/dsh-client-ui-diagram` ([`packages/client/ui-diagram/src/index.ts`](../packages/client/ui-diagram/src/index.ts))
+- `@deepseek-ai/dsh-client-ui-diagram-canvas` ([`packages/client/ui-diagram-canvas/src/index.ts`](../packages/client/ui-diagram-canvas/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-directory-picker-browse` ([`packages/client/ui-directory-picker-browse/src/index.ts`](../packages/client/ui-directory-picker-browse/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-directory-picker-native` ([`packages/client/ui-directory-picker-native/src/index.ts`](../packages/client/ui-directory-picker-native/src/index.ts))
 - `@deepseek-ai/dsh-client-ui-goal` ([`packages/client/ui-goal/src/index.ts`](../packages/client/ui-goal/src/index.ts))

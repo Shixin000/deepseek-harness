@@ -1,0 +1,61 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  background: var(--dsw-alias-bg-page);
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-module-platform);
+}
+
+.title {
+  font-weight: 600;
+  color: var(--dsw-alias-label-primary);
+}
+
+.path {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.dirty {
+  flex: none;
+  color: var(--dsw-alias-state-warning-primary);
+}
+
+.error {
+  flex: none;
+  color: var(--dsw-alias-state-danger-primary);
+}
+
+.reload {
+  flex: none;
+}
+
+.export {
+  flex: none;
+}
+
+.save {
+  flex: none;
+  margin-left: auto;
+}
+
+.close {
+  flex: none;
+}
+
+.editor {
+  flex: 1;
+  min-height: 0;
+}

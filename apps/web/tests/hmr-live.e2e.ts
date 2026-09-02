@@ -1,6 +1,6 @@
 /** Published dsh web + pnpm dev:web → browser HMR, with no page reload. */
 
-import { existsSync, globSync } from 'node:fs'
+import { existsSync, globSync, statSync } from 'node:fs'
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -77,6 +77,13 @@ it('hot-reloads a real client-plugin source edit without refreshing the page', a
   const clientBundlePaths = globSync('packages/*/*/lib/client.js{,.map}', { cwd: REPO_ROOT })
     .map(path => join(REPO_ROOT, path))
   const originalClientBundles = await Promise.all(clientBundlePaths.map(async path => [path, await readFile(path)] as const))
+  // dev:web also runs `vite build --watch` over apps/web/dist, so the served
+  // shell rewrites hashed assets and their html pointers while the plugin
+  // bundle rebuilds; both trees must return to their recorded state.
+  const distPaths = globSync('apps/web/dist/**/*', { cwd: REPO_ROOT })
+    .filter(path => statSync(join(REPO_ROOT, path)).isFile())
+    .map(path => join(REPO_ROOT, path))
+  const originalDist = await Promise.all(distPaths.map(async path => [path, await readFile(path)] as const))
   const originalSource = await readFile(sourcePath)
   const oldText = 'Into the Unknown'
   const sourceNeedle = "'hero.headline': 'Into the Unknown'"
@@ -129,11 +136,24 @@ it('hot-reloads a real client-plugin source edit without refreshing the page', a
   } catch (error) {
     failures.push(error)
   } finally {
-    await writeFile(sourcePath, originalSource).catch((error: unknown) => failures.push(error))
+    // Stop the watcher before restoring sources so no rebuild races the
+    // write-backs.
     if (watcher !== undefined) await stopTree(watcher).catch((error: unknown) => failures.push(error))
+    await writeFile(sourcePath, originalSource).catch((error: unknown) => failures.push(error))
     await Promise.all(originalClientBundles.map(async ([path, content]) => {
       await writeFile(path, content).catch((error: unknown) => failures.push(error))
     }))
+    // Restore the dist tree and remove any hashed asset vite added during the
+    // watched rebuild, leaving the recorded artifact digest intact for the
+    // assembled-boot suites that follow.
+    const currentDist = new Set(globSync('apps/web/dist/**/*', { cwd: REPO_ROOT })
+      .filter(path => statSync(join(REPO_ROOT, path)).isFile())
+      .map(path => join(REPO_ROOT, path)))
+    await Promise.all(originalDist.map(async ([path, content]) => {
+      currentDist.delete(path)
+      await writeFile(path, content).catch((error: unknown) => failures.push(error))
+    }))
+    await Promise.all([...currentDist].map(async path => rm(path, { force: true }).catch((error: unknown) => failures.push(error))))
     if (host !== undefined) await stopTree(host).catch((error: unknown) => failures.push(error))
     await browser?.close().catch((error: unknown) => failures.push(error))
     await subprocessFiber?.dispose().catch((error: unknown) => failures.push(error))

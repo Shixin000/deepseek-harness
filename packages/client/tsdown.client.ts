@@ -113,7 +113,7 @@ export function clientBundle(
   return ({ env }) => {
     const face = buildFace(env?.DSH_BUILD_FACE)
     const clientEntry = face === undefined ? 'src/client/index.ts' : 'lib/types/client/index.js'
-    const client = clientConfig(id, clientEntry)
+    const client = clientConfig(id, clientEntry, options.client)
     const node = [lib, ...(options.companions ?? [])]
     if (face === 'host') return options.hostPhase === true ? node : [SKIP_WORKSPACE_BUILD]
     if (face === 'client') {
@@ -202,6 +202,15 @@ interface ClientBundleOptions {
   readonly companions?: readonly UserConfig[]
   /** Overrides for the package's primary Node-side library config. */
   readonly lib?: UserConfig
+  /**
+   * Browser-bundle overrides: `plugins` (extending, never replacing, the
+   * preset pipeline) and object-form `outputOptions`. A package carrying a
+   * third-party library with dynamic imports passes
+   * `{ outputOptions: { inlineDynamicImports: true } }` here so its bundle
+   * stays one publishable lib/client.js artifact instead of a hash-named
+   * chunk tree the loader cannot serve.
+   */
+  readonly client?: UserConfig
 }
 
 type BuildFace = 'host' | 'client' | undefined
@@ -425,7 +434,7 @@ function matchesSpecifier(patterns: readonly RegExp[], specifier: string): boole
   return patterns.some(pattern => pattern.test(specifier))
 }
 
-function clientConfig(id: string, entry: string): UserConfig {
+function clientConfig(id: string, entry: string, overrides: UserConfig = {}): UserConfig {
   const isRequested = (specifier: string): boolean => clientExternals(id).has(specifier)
   return {
     name: `${id}/client`,
@@ -479,7 +488,7 @@ function clientConfig(id: string, entry: string): UserConfig {
       'import.meta.env.MODE': JSON.stringify(process.env.NODE_ENV ?? 'production'),
       'import.meta.env': JSON.stringify({ MODE: process.env.NODE_ENV ?? 'production' }),
     },
-    plugins: [{
+    plugins: [...(Array.isArray(overrides.plugins) ? overrides.plugins : []), {
       // Bundle purity gate (build-time mirror of the module-edge rules): the
       // baseline and package-specific requests stay external, inline-safe wire layers
       // inline, and every other @deepseek-ai value import is a build error — a
@@ -556,6 +565,9 @@ function clientConfig(id: string, entry: string): UserConfig {
       },
     }],
     outputOptions: {
+      ...(typeof overrides.outputOptions === 'object' && overrides.outputOptions !== null
+        ? overrides.outputOptions
+        : {}),
       entryFileNames: 'client.js',
       sourcemapExcludeSources: false,
       // The map is served from /plugins/<scoped-package>/client.js.map. The

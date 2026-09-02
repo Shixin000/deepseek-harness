@@ -37,6 +37,8 @@ const EXPECTED_TOOLS = [
   'ask_user_question',
   'bash',
   'create_goal',
+  'diagram',
+  'diagram_read',
   'edit',
   'exit_plan_mode',
   'get_goal',

@@ -61,6 +61,13 @@
   config:
     sampleOverCapGlobResults: false
 
+# ── drawing ────────────────────────────────────────────────────────────────
+
+# Registers into the host `tools` registry like the fs tools; the Web card
+# (`dsh-client-ui-diagram`) renders the produced .excalidraw files inline.
+- id: tool-diagram
+  name: '@deepseek-ai/dsh-diagram'
+
 # ── background jobs ────────────────────────────────────────────────────────
 
 # Only the model-facing controls. The task REGISTRY stays on the host plane:

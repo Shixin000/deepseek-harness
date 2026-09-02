@@ -87,6 +87,10 @@
     - id: plugin-inventory
       name: '@deepseek-ai/dsh-host-plugin-inventory'
 
+    # Canvas save/load gateway for the interactive whiteboard (host plane).
+    - id: diagram-remote
+      name: '@deepseek-ai/dsh-diagram/host'
+
     # Session commands, cold reads, and live control over Typert Remote.
     - id: session-controller
       name: '@deepseek-ai/dsh-api-session-controller'
@@ -223,6 +227,14 @@
     # Tool call tree, generic fallback, and keyed business Tool views.
     - id: ui-tool
       name: '@deepseek-ai/dsh-client-ui-tool'
+
+    # Inline read-only rendering of `diagram` tool calls (.excalidraw files).
+    - id: ui-diagram
+      name: '@deepseek-ai/dsh-client-ui-diagram'
+
+    # Interactive Excalidraw whiteboard panel: open and edit .excalidraw files.
+    - id: ui-diagram-canvas
+      name: '@deepseek-ai/dsh-client-ui-diagram-canvas'
 
     - id: ui-cordis
       name: '@deepseek-ai/dsh-client-ui-cordis'

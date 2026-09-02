@@ -14,6 +14,10 @@ Use the read tool — not shell commands like cat — to inspect text files. Res
 
 Use the write tool to create files or completely replace file contents. Existing files are overwritten, so read an existing file first (the default fs-observation-policy requires it) and prefer edit for targeted changes.
 
+Use the diagram tool to create visual diagrams (flowcharts, architecture, wireframes) as .excalidraw files in the workspace. Describe shapes with the structured element spec: rect/ellipse/diamond shapes (with optional centered text), standalone text, and line/arrow connectors through point lists. All coordinates use canvas units (x right, y down).
+
+Use the diagram_read tool to inspect an existing .excalidraw diagram: it returns a bounded summary of element types, geometry, labels, and connector points (at most 200 elements), plus the canvas bounds. Prefer diagram_read over parsing Excalidraw JSON directly when modifying or reasoning about an existing diagram.
+
 Use the edit tool for targeted changes to existing UTF-8 text files. It replaces literal old_string with new_string; by default old_string must appear exactly once. If old_string appears multiple times, provide a more specific old_string or set replace_all to true. Read the file first (the default fs-observation-policy requires it), unless you just created or edited it in this session.
 
 Use the glob tool — not shell find — to discover files by path pattern. A pattern with no "/" matches basenames at any depth, so "*" matches every file in the tree rather than its top level. Results are files only, never directories, and include hidden and ignored files: a result that fits comes back in modification-time order, while a larger one keeps the modification-time-ordered head.

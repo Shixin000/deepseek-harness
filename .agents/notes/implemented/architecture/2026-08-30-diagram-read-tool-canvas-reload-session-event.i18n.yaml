@@ -1,0 +1,6 @@
+# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
+# side as of the last confirmed-consistent state. Both languages carry equal authority;
+# after editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-08-30-diagram-read-tool-canvas-reload-session-event.md
+2026-08-30-diagram-read-tool-canvas-reload-session-event.md: d9998a1ca1e3a6d2deed18e919a6803b2e33d84c
+2026-08-30-diagram-read-tool-canvas-reload-session-event.zh.md: 062767c69ac09d5b9ff4e8210520cbf9b49321a4

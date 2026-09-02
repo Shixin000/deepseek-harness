@@ -47,6 +47,7 @@ Every package lives in exactly one group; new packages join existing groups, and
 | [`skill/`](skill/README.md) | Skill capability family: provider registry, local provider, model-facing catalog/loader |
 | [`compaction/`](compaction/README.md) | Compaction capability family: Service Definition + basic provider + command Consumer |
 | [`context/`](context/README.md) | Model-visible request context: workspace instructions, time context, references |
+| [`drawing/`](drawing/README.md) | Diagram capability: the model-facing `diagram` tool writing Excalidraw files |
 | [`subagent/`](subagent/README.md) | Subagent capability family: provider-registry contract and model-facing delegation tools |
 | [`jobs/`](jobs/README.md) | Generic background-job runtime and model-facing job control tools |
 | [`experimental/`](experimental/README.md) | Private prototypes and internal-only plugins |

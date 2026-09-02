@@ -326,6 +326,315 @@
       }
     },
     {
+      "name": "diagram",
+      "description": "Create or replace an Excalidraw diagram file (.excalidraw) in the workspace from a structured shape spec.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "description": "Output path, resolved against the session workspace; must end with .excalidraw."
+          },
+          "elements": {
+            "type": "array",
+            "description": "Shapes to draw, in draw order. rect/ellipse/diamond take x, y, w, h and optional centered text; text takes x, y and text; line/arrow take a points list (at least 2 points).",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "const": "rect"
+                    },
+                    "x": {
+                      "type": "number"
+                    },
+                    "y": {
+                      "type": "number"
+                    },
+                    "w": {
+                      "type": "number"
+                    },
+                    "h": {
+                      "type": "number"
+                    },
+                    "text": {
+                      "type": "string"
+                    },
+                    "rounded": {
+                      "type": "boolean"
+                    },
+                    "strokeColor": {
+                      "type": "string"
+                    },
+                    "fillColor": {
+                      "type": "string"
+                    },
+                    "dashed": {
+                      "type": "boolean"
+                    },
+                    "strokeWidth": {
+                      "type": "integer"
+                    },
+                    "opacity": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "x",
+                    "y",
+                    "w",
+                    "h"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "const": "ellipse"
+                    },
+                    "x": {
+                      "type": "number"
+                    },
+                    "y": {
+                      "type": "number"
+                    },
+                    "w": {
+                      "type": "number"
+                    },
+                    "h": {
+                      "type": "number"
+                    },
+                    "text": {
+                      "type": "string"
+                    },
+                    "strokeColor": {
+                      "type": "string"
+                    },
+                    "fillColor": {
+                      "type": "string"
+                    },
+                    "dashed": {
+                      "type": "boolean"
+                    },
+                    "strokeWidth": {
+                      "type": "integer"
+                    },
+                    "opacity": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "x",
+                    "y",
+                    "w",
+                    "h"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "const": "diamond"
+                    },
+                    "x": {
+                      "type": "number"
+                    },
+                    "y": {
+                      "type": "number"
+                    },
+                    "w": {
+                      "type": "number"
+                    },
+                    "h": {
+                      "type": "number"
+                    },
+                    "text": {
+                      "type": "string"
+                    },
+                    "strokeColor": {
+                      "type": "string"
+                    },
+                    "fillColor": {
+                      "type": "string"
+                    },
+                    "dashed": {
+                      "type": "boolean"
+                    },
+                    "strokeWidth": {
+                      "type": "integer"
+                    },
+                    "opacity": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "x",
+                    "y",
+                    "w",
+                    "h"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "const": "text"
+                    },
+                    "x": {
+                      "type": "number"
+                    },
+                    "y": {
+                      "type": "number"
+                    },
+                    "text": {
+                      "type": "string"
+                    },
+                    "w": {
+                      "type": "number"
+                    },
+                    "fontSize": {
+                      "type": "integer"
+                    },
+                    "color": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "x",
+                    "y",
+                    "text"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "const": "line"
+                    },
+                    "points": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "x": {
+                            "type": "number"
+                          },
+                          "y": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "x",
+                          "y"
+                        ]
+                      }
+                    },
+                    "strokeColor": {
+                      "type": "string"
+                    },
+                    "dashed": {
+                      "type": "boolean"
+                    },
+                    "strokeWidth": {
+                      "type": "integer"
+                    },
+                    "opacity": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "points"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "const": "arrow"
+                    },
+                    "points": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "x": {
+                            "type": "number"
+                          },
+                          "y": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "x",
+                          "y"
+                        ]
+                      }
+                    },
+                    "strokeColor": {
+                      "type": "string"
+                    },
+                    "dashed": {
+                      "type": "boolean"
+                    },
+                    "strokeWidth": {
+                      "type": "integer"
+                    },
+                    "opacity": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "points"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "file",
+          "elements"
+        ]
+      }
+    },
+    {
+      "name": "diagram_read",
+      "description": "Read an existing Excalidraw diagram file (.excalidraw) and return a structured summary of its elements: types, geometry, labels, and connector points.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "description": "Path to read, resolved against the session workspace; must end with .excalidraw."
+          }
+        },
+        "required": [
+          "file"
+        ]
+      }
+    },
+    {
       "name": "edit",
       "description": "Edit an existing UTF-8 text file by replacing literal text.",
       "parameters": {

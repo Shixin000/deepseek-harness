@@ -69,6 +69,8 @@
     { "path": "./packages/client/ui-chat" },
     { "path": "./packages/client/ui-conversation" },
     { "path": "./packages/client/ui-tool" },
+    { "path": "./packages/client/ui-diagram" },
+    { "path": "./packages/client/ui-diagram-canvas" },
     { "path": "./packages/client/ui-deliverables" },
     { "path": "./packages/client/ui-workflow-run" },
     { "path": "./packages/client/ui-workspace" },
