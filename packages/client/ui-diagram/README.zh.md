@@ -49,6 +49,7 @@ kind: "package-reference"
 - `src/client/DiagramSvg.tsx` 是基于已校验元素的纯、零依赖 SVG 渲染器——不打包 Excalidraw 运行时（客户端 bundle 急切加载，约 1.5 MB 的编辑器推迟到交互白板阶段）。
 - `src/client/DiagramCard.tsx` 从块类型、`isError` 与解析后的 meta 派生卡片状态（进行中/失败/已渲染/无预览），并把文件参数传给所有者的 `openFile`。
 - `src/client/index.ts` 注册 `diagram` 语言命名空间与 keyed `tool.call.toolview` 行。
+- 不发布运行时不变式伴生入口：语言命名空间与 keyed 工具视图属于注册表持有的注册（释放由 HMR 安全规范证明），meta 校验/SVG 渲染对线上数据是纯函数。
 
 </details>
 

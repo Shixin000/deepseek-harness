@@ -49,6 +49,7 @@ The preview renders the Excalidraw element subset the `dsh-diagram` tool emits: 
 - `src/client/DiagramSvg.tsx` is a pure, dependency-free SVG renderer over the validated elements — no Excalidraw runtime is bundled (client bundles load eagerly, so the ~1.5 MB editor is deferred to the interactive whiteboard phase).
 - `src/client/DiagramCard.tsx` derives the card state (pending/failed/rendered/no-preview) from the block kind, `isError`, and the parsed meta, and threads the file argument to the owner's `openFile`.
 - `src/client/index.ts` registers the `diagram` locale namespace and the keyed `tool.call.toolview` row.
+- No runtime invariant companion is published because the locale namespace and keyed toolview are registry-owned registrations (disposal proven by the HMR-safety spec) and the meta validation/SVG render are pure over wire data.
 
 </details>
 

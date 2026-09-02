@@ -77,6 +77,7 @@ Every shape except `text` also accepts `strokeColor`, `fillColor` (hex triplet o
 - `src/read-tool.ts` parses and summarizes an existing document with the same validation spirit as the write path: malformed elements are skipped, geometry coerces to finite numbers, and the summary is bounded by the element cap with an explicit total.
 - `src/remote.ts` backs the interactive whiteboard (`diagram.save`/`diagram.read` Remote methods) and records the log-only `diagram/saved` session event when the caller attaches a session id.
 - `src/index.ts` registers both tools, the `tool:diagram` and `tool:diagram_read` system-prompt sections, and the replayable `presentationMeta` projection.
+- No runtime invariant companion is published because tool registration is a registry-owned effect (disposal proven by the HMR-safety spec) and the validation/expansion pipeline is pure over its inputs; the package emits no cordis events.
 
 </details>
 

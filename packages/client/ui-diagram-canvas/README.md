@@ -51,6 +51,7 @@ The overlay and the open action share one canvas instance (open/path/scene/dirty
 - `reload.ts` parses a `.excalidraw` document's text back into a live scene through Excalidraw's `restore`; malformed payloads resolve null.
 - `export.ts` renders the live scene to a PNG blob and triggers a browser download.
 - `src/client/index.ts` creates the canvas instance, registers the overlay and the open action, and builds the save/reload bridges over `ctx.remote.diagram.save`/`read`.
+- No runtime invariant companion is published because the overlay and open-action registrations and the locale dictionaries are registry-owned registrations (disposal proven by the HMR-safety spec); the panel renders wire data and emits no cordis events.
 
 </details>
 

@@ -77,6 +77,7 @@ kind: "package-reference"
 - `src/read-tool.ts` 以与写入路径相同的校验精神解析并汇总已有文档：跳过畸形元素、几何值强制为有限数，汇总受元素上限约束并给出真实总数。
 - `src/remote.ts` 支撑交互白板（`diagram.save`/`diagram.read` Remote 方法），并在调用方附带会话 id 时记录仅日志的 `diagram/saved` 会话事件。
 - `src/index.ts` 注册两个工具、`tool:diagram` 与 `tool:diagram_read` 系统提示分节，以及可回放的 `presentationMeta` 投影。
+- 不发布运行时不变式伴生入口：工具注册属于注册表持有的效应（释放由 HMR 安全规范证明），校验/展开管线对输入是纯函数；本包不发出任何 cordis 事件。
 
 </details>
 

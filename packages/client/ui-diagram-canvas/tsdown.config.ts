@@ -6,7 +6,7 @@ import { clientBundle } from '../tsdown.client.ts'
 // graphlib module. rolldown would split those into hash-named chunks the
 // module loader cannot serve and the `files` list cannot publish, so both are
 // pinned into the single lib/client.js artifact (see ClientBundleOptions.client).
-export default clientBundle('@deepseek-ai/dsh-client-ui-diagram-canvas', ['lib/types/index.js', 'lib/types/invariant.js'], {
+export default clientBundle('@deepseek-ai/dsh-client-ui-diagram-canvas', ['lib/types/index.js'], {
   client: {
     outputOptions: { inlineDynamicImports: true },
     plugins: [{

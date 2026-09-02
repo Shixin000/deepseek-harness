@@ -51,6 +51,7 @@ kind: "package-reference"
 - `reload.ts` 把 `.excalidraw` 文档文本经 Excalidraw 的 `restore` 还原为实时场景；畸形载荷解析为 null。
 - `export.ts` 把实时场景渲染为 PNG blob 并触发浏览器下载。
 - `src/client/index.ts` 创建画布实例、注册覆盖层与打开动作，并构建基于 `ctx.remote.diagram.save`/`read` 的保存/读取桥。
+- 不发布运行时不变式伴生入口：覆盖层与打开动作注册、语言字典均属于注册表持有的注册（释放由 HMR 安全规范证明）；面板渲染线上数据且不发出任何 cordis 事件。
 
 </details>
 

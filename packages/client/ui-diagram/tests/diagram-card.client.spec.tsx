@@ -22,6 +22,7 @@ function props(block: ToolCallBlock, openFile = vi.fn()) {
     block,
     t,
     openFile,
+    loadImage: (() => undefined) as never,
     useSession: (() => undefined) as never,
     useSessions: (() => []) as never,
     useWorkspaces: (() => []) as never,
