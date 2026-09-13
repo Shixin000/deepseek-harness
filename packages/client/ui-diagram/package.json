@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-client-ui-diagram",
   "description": "Web diagram tool card: inline read-only SVG rendering of .excalidraw diagrams produced by the diagram tool",
-  "version": "0.1.2-alpha.5",
+  "version": "0.1.5-rc.2",
   "publishConfig": {
     "access": "public"
   },

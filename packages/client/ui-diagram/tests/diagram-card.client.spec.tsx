@@ -6,6 +6,7 @@ import { afterEach } from 'vitest'
 import { cleanup, fireEvent, render } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
+import type { GlobalStandardProps } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ToolCallBlock } from '@deepseek-ai/dsh-client-ui-conversation/client'
 import { DiagramCard } from '../src/client/DiagramCard.tsx'
 import { en, zh } from '../src/client/locales.ts'
@@ -13,6 +14,10 @@ import { en, zh } from '../src/client/locales.ts'
 afterEach(cleanup)
 
 const t = makeTranslate(zh, en)
+
+// Every fixture carries the resource hook the resources plugin merges into GlobalStandardProps.
+const useResource = (() => ({ status: 'none' as const, value: undefined, failure: undefined, reload: () => {} })) as GlobalStandardProps['useResource']
+const usePanelInfo: GlobalStandardProps['usePanelInfo'] = selector => selector({ activePanelId: null })
 
 /** Minimal props the card reads; t is the real localized translate. */
 function props(block: ToolCallBlock, openFile = vi.fn()) {
@@ -23,6 +28,8 @@ function props(block: ToolCallBlock, openFile = vi.fn()) {
     t,
     openFile,
     loadImage: (() => undefined) as never,
+    useResource,
+    usePanelInfo,
     useSession: (() => undefined) as never,
     useSessions: (() => []) as never,
     useWorkspaces: (() => []) as never,

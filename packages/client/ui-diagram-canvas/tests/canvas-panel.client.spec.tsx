@@ -6,6 +6,7 @@ import { afterEach } from 'vitest'
 import { cleanup, fireEvent, render } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
+import type { GlobalStandardProps } from '@deepseek-ai/dsh-client-ui-slots'
 
 import { createCanvasStore } from '../src/client/canvas-store.ts'
 import type { CanvasScene } from '../src/client/canvas-store.ts'
@@ -15,6 +16,10 @@ import { en, zh } from '../src/client/locales.ts'
 afterEach(cleanup)
 
 const t = makeTranslate(zh, en)
+
+// Every fixture carries the resource hook the resources plugin merges into GlobalStandardProps.
+const useResource = (() => ({ status: 'none' as const, value: undefined, failure: undefined, reload: () => {} })) as GlobalStandardProps['useResource']
+const usePanelInfo: GlobalStandardProps['usePanelInfo'] = selector => selector({ activePanelId: null })
 
 // The Excalidraw editor is a heavy canvas component; the panel contract we
 // own is the store wiring around it, so the component is stubbed. Mounts are
@@ -55,6 +60,8 @@ function bench(initial: { open: boolean; path: string }) {
     save,
     reload,
     t,
+    useResource,
+    usePanelInfo,
     useSessions: (() => []) as never,
     useSessionPendingInteraction: (() => undefined) as never,
     useWorkspaces: (() => []) as never,

@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-client-ui-diagram-canvas",
   "description": "Web interactive Excalidraw whiteboard panel: open and edit .excalidraw diagrams produced by the diagram tool",
-  "version": "0.1.2-alpha.5",
+  "version": "0.1.5-rc.2",
   "publishConfig": {
     "access": "public"
   },
@@ -43,9 +43,6 @@
     "watch": "tsdown --watch"
   },
   "license": "MIT",
-  "dependencies": {
-    "@excalidraw/excalidraw": "^0.18.0"
-  },
   "peerDependencies": {
     "@deepseek-ai/cordis": "workspace:^"
   },
@@ -60,6 +57,8 @@
     "@deepseek-ai/dsh-client-ui-session": "workspace:^",
     "@deepseek-ai/dsh-client-ui-slots": "workspace:^",
     "@deepseek-ai/dsh-client-ui-tool": "workspace:^",
+    "@excalidraw/excalidraw": "^0.18.0",
+    "@excalidraw/utils": "^0.1.5",
     "@types/react": "~18.3.1",
     "react": "^18.2.0"
   },

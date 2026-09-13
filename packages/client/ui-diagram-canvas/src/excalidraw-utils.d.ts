@@ -1,10 +1,10 @@
 /**
- * Typings for the `@excalidraw/utils` subpaths the Excalidraw package's type
- * entry re-exports but never ships: `@excalidraw/utils` has no stable npm
- * release, so the re-exported `exportToBlob`/`exportToCanvas` names would
- * otherwise resolve to an error type. Only the narrow surface this package
- * uses is declared; the runtime implementation comes from the Excalidraw
- * bundle itself, so these declarations are types-only.
+ * Typings for the `@excalidraw/utils` subpath the Excalidraw package's type
+ * entry re-exports but never ships: `@excalidraw/utils` publishes no
+ * `export` declaration, so the re-exported `exportToBlob`/`exportToCanvas`
+ * names would otherwise resolve to an error type. Only the narrow surface this
+ * package uses is declared; the runtime implementation comes from the
+ * Excalidraw bundle itself, so these declarations are types-only.
  */
 
 declare module '@excalidraw/utils/export' {

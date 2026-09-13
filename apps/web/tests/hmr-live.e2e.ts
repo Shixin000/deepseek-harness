@@ -13,6 +13,20 @@ import type { SubprocessHandle, SubprocessSpawnSpec } from '@deepseek-ai/dsh-sub
 import { readClientBuildRecord } from '../../../scripts/client-build-environment.ts'
 import { REPO_ROOT } from './support.ts'
 
+const CLIENT_ARTIFACT_PATTERNS = [
+  'apps/web/dist/**/*',
+  'packages/*/*/lib/client.js',
+  'packages/*/*/lib/client.js.map',
+]
+
+/** Return every artifact that `pnpm run dev:web` can rewrite. */
+function clientArtifactPaths(): string[] {
+  return globSync(CLIENT_ARTIFACT_PATTERNS, { cwd: REPO_ROOT })
+    .map(path => join(REPO_ROOT, path))
+    .filter(path => statSync(path).isFile())
+    .sort()
+}
+
 function spawnSpec(argv: readonly string[], cwd: string, env?: Record<string, string>): SubprocessSpawnSpec {
   return {
     argv,
@@ -64,7 +78,7 @@ function waitForOutput(child: SubprocessHandle, pattern: RegExp, label: string):
 async function stopTree(child: SubprocessHandle): Promise<void> {
   child.terminate()
   const stopped = await child.waitForExit(AbortSignal.timeout(15_000))
-  if (!stopped) throw new Error(`process tree ${String(child.pid)} did not stop after termination escalation`)
+  if (!stopped) throw new Error('managed process range did not stop after termination escalation')
   await child.done
 }
 
@@ -74,16 +88,9 @@ it('hot-reloads a real client-plugin source edit without refreshing the page', a
   const binPath = join(REPO_ROOT, 'apps/cli/lib/bin.js')
   if (!existsSync(binPath)) throw new Error('HMR browser test needs the built dsh bin; run pnpm run build first')
   const clientBuildEnvironment = readClientBuildRecord(REPO_ROOT).environment
-  const clientBundlePaths = globSync('packages/*/*/lib/client.js{,.map}', { cwd: REPO_ROOT })
-    .map(path => join(REPO_ROOT, path))
-  const originalClientBundles = await Promise.all(clientBundlePaths.map(async path => [path, await readFile(path)] as const))
-  // dev:web also runs `vite build --watch` over apps/web/dist, so the served
-  // shell rewrites hashed assets and their html pointers while the plugin
-  // bundle rebuilds; both trees must return to their recorded state.
-  const distPaths = globSync('apps/web/dist/**/*', { cwd: REPO_ROOT })
-    .filter(path => statSync(join(REPO_ROOT, path)).isFile())
-    .map(path => join(REPO_ROOT, path))
-  const originalDist = await Promise.all(distPaths.map(async path => [path, await readFile(path)] as const))
+  const originalClientArtifacts = await Promise.all(clientArtifactPaths()
+    .map(async path => [path, await readFile(path)] as const))
+  const originalClientArtifactPaths = new Set(originalClientArtifacts.map(([path]) => path))
   const originalSource = await readFile(sourcePath)
   const oldText = 'Into the Unknown'
   const sourceNeedle = "'hero.headline': 'Into the Unknown'"
@@ -136,27 +143,23 @@ it('hot-reloads a real client-plugin source edit without refreshing the page', a
   } catch (error) {
     failures.push(error)
   } finally {
-    // Stop the watcher before restoring sources so no rebuild races the
-    // write-backs.
-    if (watcher !== undefined) await stopTree(watcher).catch((error: unknown) => failures.push(error))
     await writeFile(sourcePath, originalSource).catch((error: unknown) => failures.push(error))
-    await Promise.all(originalClientBundles.map(async ([path, content]) => {
-      await writeFile(path, content).catch((error: unknown) => failures.push(error))
-    }))
-    // Restore the dist tree and remove any hashed asset vite added during the
-    // watched rebuild, leaving the recorded artifact digest intact for the
-    // assembled-boot suites that follow.
-    const currentDist = new Set(globSync('apps/web/dist/**/*', { cwd: REPO_ROOT })
-      .filter(path => statSync(join(REPO_ROOT, path)).isFile())
-      .map(path => join(REPO_ROOT, path)))
-    await Promise.all(originalDist.map(async ([path, content]) => {
-      currentDist.delete(path)
-      await writeFile(path, content).catch((error: unknown) => failures.push(error))
-    }))
-    await Promise.all([...currentDist].map(async path => rm(path, { force: true }).catch((error: unknown) => failures.push(error))))
+    if (watcher !== undefined) await stopTree(watcher).catch((error: unknown) => failures.push(error))
     if (host !== undefined) await stopTree(host).catch((error: unknown) => failures.push(error))
     await browser?.close().catch((error: unknown) => failures.push(error))
     await subprocessFiber?.dispose().catch((error: unknown) => failures.push(error))
+    await Promise.all(clientArtifactPaths()
+      .filter(path => !originalClientArtifactPaths.has(path))
+      .map(async (path) => { await rm(path, { force: true }) }))
+      .catch((error: unknown) => failures.push(error))
+    await Promise.all(originalClientArtifacts.map(async ([path, content]) => {
+      await writeFile(path, content)
+    })).catch((error: unknown) => failures.push(error))
+    try {
+      readClientBuildRecord(REPO_ROOT)
+    } catch (error) {
+      failures.push(error)
+    }
     await rm(world, { recursive: true, force: true }).catch((error: unknown) => failures.push(error))
   }
   if (failures.length > 0) throw new AggregateError(failures, 'HMR browser test or cleanup failed')
