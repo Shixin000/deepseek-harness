@@ -73,9 +73,10 @@ kind: "package-reference"
 
 - `src/spec.ts` 校验运行时 schema 无法表达的约束：有限几何值、正尺寸、连线点数、颜色格式与有界字段。
 - `src/expand.ts` 把每种规格形状映射为 Excalidraw 元素（`rectangle`/`ellipse`/`diamond`/`text`/`line`/`arrow`），带稳定 id（`diagram-1`、…）、相对连线点，形状标签展开为独立的居中文本元素；`diagramBounds` 根据规格计算画布尺寸。
-- `src/write.ts` 组装 `.excalidraw` 信封（`type: 'excalidraw'`、`version: 2`、`elements`、`appState`、`files: {}`），并通过 `ctx.fs` 写入，走共享的 `fs/write-intent` waterfall 与 `fs/observed` `present` 观测，使会话的沙箱与观测策略生效。
+- `src/write.ts` 组装 `.excalidraw` 信封（`type: 'excalidraw'`、`version: 2`、`elements`、`appState`、`files: {}`），并通过 `ctx.fs` 写入，走共享的 `fs/write-intent` waterfall，在本次变更上标注调用会话解析出的沙箱策略，并发出 `fs/observed` `present` 观测；受限文件系统据此按会话工作区对该写入设限。
+- `src/sandbox.ts` 解析该单次调用策略与两条路径共用的工作目录，使路径解析与文件系统限制共享同一个工作区根；无会话调用方使用配置的回退根。
 - `src/read-tool.ts` 以与写入路径相同的校验精神解析并汇总已有文档：跳过畸形元素、几何值强制为有限数，汇总受元素上限约束并给出真实总数。
-- `src/remote.ts` 支撑交互白板（`diagram.save`/`diagram.read` Remote 方法），并在调用方附带会话 id 时记录仅日志的 `diagram/saved` 会话事件。
+- `src/remote.ts` 支撑交互白板（`diagram.save`/`diagram.read` Remote 方法），为保存解析指定会话的策略，并在调用方附带会话 id 时记录仅日志的 `diagram/saved` 会话事件。
 - `src/index.ts` 注册两个工具、`tool:diagram` 与 `tool:diagram_read` 系统提示分节，以及可回放的 `presentationMeta` 投影。
 - 不发布运行时不变式伴生入口：工具注册属于注册表持有的效应（释放由 HMR 安全规范证明），校验/展开管线对输入是纯函数；本包不发出任何 cordis 事件。
 

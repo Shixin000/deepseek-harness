@@ -14,6 +14,7 @@ import type { GenericCallView, ToolExecution } from '@deepseek-ai/dsh-tools'
 import type { FsTarget } from '@deepseek-ai/dsh-fs'
 import type {} from '@deepseek-ai/dsh-fs'
 import { DIAGRAM_EXTENSION } from './write.ts'
+import { diagramResolutionCwd, diagramSandboxPolicy } from './sandbox.ts'
 
 /** Inclusive byte cap for one diagram read; larger files fail explicitly. */
 export const DIAGRAM_READ_TOOL_MAX_BYTES = 16 * 1024 * 1024
@@ -235,7 +236,8 @@ export function applyReadTool(ctx: Context): void {
         throw new Error(`file must end with ${DIAGRAM_EXTENSION}`)
       }
       const resolveOptions: { cwd?: string; signal?: AbortSignal } = { signal: exec.signal }
-      const cwd = sessionCwd(exec)
+      const policy = diagramSandboxPolicy(ctx, exec.agent?.session)
+      const cwd = diagramResolutionCwd(policy, sessionCwd(exec))
       if (cwd !== undefined) resolveOptions.cwd = cwd
       const target: FsTarget = await ctx.fs.resolve(file, resolveOptions)
       let info: Awaited<ReturnType<Context['fs']['stat']>>

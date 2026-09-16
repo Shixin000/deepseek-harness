@@ -24,9 +24,9 @@ store handle 不能挂载在两个 scope（`shell.overlay` 是 root，卡片链�
 
 `DiagramRemote`（`TypertRemoteService`，`@Remote('save')` / `@Remote('read')`）位于 host 平面（web 组合里的 `dsh-diagram/host` 入口），因为 Gateway 从 root scope 解析服务，而工具插件留在 agent presets。typert 工件（`./typert`、`./remote`）由构建时的 workspace typert 插件生成；`typert-loader` 自动注册描述符；客户端装配（`api/remotes`）挂载 `diagram` 命名空间。
 
-### 暂无会话事件
+### 仅日志的会话事件
 
-画布保存尚未记录到会话日志。model-visible ⟺ logged 规则在内容进入模型请求时生效；那发生在模型读取里程碑（M-C），届时将在同一变更中补事件。
+画布保存会把仅日志的 `diagram/saved` 事件（`path`、`elementCount`）追加到所属会话。model-visible ⟺ logged 规则在内容进入模型请求时生效；保存内容目前仍不进入模型请求，因此任何让它变为 model-visible 的变更都必须在同一变更中扩展该事件。保存标注的策略见[图表写入携带调用会话的沙箱策略](../bug-fix/2026-09-13-diagram-writes-carry-sandbox-policy.zh.md)。
 
 ## 为什么没有 cordis-catalog 条目 / 没有 `@mode`
 
@@ -50,10 +50,10 @@ store handle 不能挂载在两个 scope（`shell.overlay` 是 root，卡片链�
 
 web 组合现在挂载 `dsh-diagram/host`，其 typert 描述符与其他 Remote 贡献一样由 `typert-loader` 注册；`api/remotes` 客户端装配挂载 `diagram` 命名空间。
 
-画布保存绕开会话日志直到 M-C；任何让保存内容进入模型请求的里程碑，必须在同一变更中补对应会话事件。
+画布保存会追加仅日志的 `diagram/saved` 事件；任何让保存内容进入模型请求的变更，必须在同一变更中扩展该事件。
 
 ## 验证
 
 - `ui-diagram-canvas`：20 个测试，逐文件 100% 覆盖——store 动作、打开动作 select/挂载、面板状态（进行中/dirty/保存成功/失败/未命名）、注册 + HMR 移除，以及针对 fake `remote.diagram` 的保存桥。
-- `dsh-diagram`：35 个测试，逐文件 100% 覆盖，含 Remote 网关（save/read 往返、路径策略、写/读失败、超大读取）。
+- `dsh-diagram`：55 个测试，逐文件 100% 覆盖，含 Remote 网关（save/read 往返、路径策略、写/读失败、超大读取），以及一个把会话工作区放在部署回退根之外的 Loader 组合。
 - bundle 保持单一 `lib/client.js` 且无运行时动态导入（仅剩的 `import(...)` 在 JSDoc 注释里）。

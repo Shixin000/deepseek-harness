@@ -8,6 +8,7 @@
 
 import type { Context } from '@deepseek-ai/cordis'
 import type { FsTarget, FsWriteOutcome } from '@deepseek-ai/dsh-fs'
+import type { SandboxExecutionPolicy } from '@deepseek-ai/dsh-sandbox'
 import type { ExpandedElement } from './expand.ts'
 
 /** Stable marker of who produced the document. */
@@ -61,12 +62,16 @@ export function parseDiagramFile(file: string): string {
 /**
  * Write one diagram document through the session's filesystem service and
  * record the observation. The write is unconditional (the tool always
- * replaces the whole document), matching the bare `write`-tool path.
+ * replaces the whole document), matching the bare `write`-tool path. The
+ * resolved per-call `sandboxPolicy` is stamped onto the mutation so a
+ * confining filesystem fence compares the target against the calling
+ * session's workspace root.
  * @param ctx - the plugin context carrying the `fs` service and event bus.
  * @param target - the resolved write target.
  * @param json - the serialized document.
  * @param signal - aborts before atomic publication takes effect.
  * @param actor - the caller presented to the write-intent slot and observation.
+ * @param sandboxPolicy - the per-call policy; omitted when no policy service is mounted.
  * @returns the write outcome, whose version the observation records.
  */
 export async function writeDiagram(
@@ -75,9 +80,10 @@ export async function writeDiagram(
   json: string,
   signal: AbortSignal,
   actor: object | undefined,
+  sandboxPolicy?: SandboxExecutionPolicy,
 ): Promise<FsWriteOutcome> {
   const intent = await ctx.waterfall('fs/write-intent', target, actor, () => undefined)
-  const outcome = await ctx.fs.writeText(target, json, intent, signal)
+  const outcome = await ctx.fs.writeText(target, json, intent, signal, sandboxPolicy)
   ctx.emit('fs/observed', target, { kind: 'present', version: outcome.version }, actor)
   return outcome
 }

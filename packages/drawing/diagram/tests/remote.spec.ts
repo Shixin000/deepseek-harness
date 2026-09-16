@@ -1,13 +1,18 @@
 // Drives the REAL DiagramRemote gateway: mount it beside a real LocalFileSystem
 // and exercise save/read through the public service methods — the same calls
 // the Gateway dispatches for ctx.remote.diagram.
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import { LocalFileSystem } from '@deepseek-ai/dsh-fs-local'
+import { SESSION_FORMAT_VERSION, Session, SessionId } from '@deepseek-ai/dsh-session'
+import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
+import SandboxPolicyService from '@deepseek-ai/dsh-sandbox-policy'
+import SandboxedFileSystem from '@deepseek-ai/dsh-fs-sandbox'
 import DiagramRemote, { DIAGRAM_READ_MAX_BYTES } from '../src/remote.ts'
+import { assertWorkspaceOutsideTemp, outsideTempWorkspaceParent } from '../../../../scripts/snapshot-workspace-parent.ts'
 
 let dir: string
 let ctx: Context
@@ -28,6 +33,11 @@ afterEach(async () => {
 })
 
 const DOCUMENT = '{"type":"excalidraw","version":2,"source":"test","elements":[],"appState":{},"files":{}}'
+
+/** Minimal session double: the Remote reads its cwd and appends the save event. */
+function sessionDouble(append: (type: string, data: object) => void): { header: { cwd: string }; append: typeof append } {
+  return { header: { cwd: dir }, append }
+}
 
 describe('DiagramRemote', () => {
   it('saves a document into the workspace and reports the resolved path', async () => {
@@ -75,7 +85,7 @@ describe('DiagramRemote', () => {
     const sessionsCtx = new Context()
     sessionsCtx.provide('sessions', {
       get: (id: string) => id === 'session-1'
-        ? { append: (type: string, data: object) => { appended.push({ type, data }) } }
+        ? sessionDouble((type, data) => { appended.push({ type, data }) })
         : undefined,
     })
     await sessionsCtx.plugin(LocalFileSystem, { cwd: dir })
@@ -109,7 +119,7 @@ describe('DiagramRemote', () => {
     const appended: Array<{ type: string; data: object }> = []
     const sessionsCtx = new Context()
     sessionsCtx.provide('sessions', {
-      get: () => ({ append: (type: string, data: object) => { appended.push({ type, data }) } }),
+      get: () => sessionDouble((type, data) => { appended.push({ type, data }) }),
     })
     await sessionsCtx.plugin(LocalFileSystem, { cwd: dir })
     await sessionsCtx.plugin(DiagramRemote)
@@ -139,5 +149,62 @@ describe('DiagramRemote', () => {
     const result = await remote.read({ path: 'big.excalidraw' })
     expect(result.ok).toBe(false)
     if (!result.ok) expect(result.code).toBe('read-failed')
+  })
+})
+
+// A confining backend fences every mutation by the per-call policy the caller
+// resolves, so the Remote must stamp the named session's policy — or the
+// configured fallback root for an agentless caller — or the fence rejects the
+// session's own workspace.
+describe('DiagramRemote under a confining filesystem', () => {
+  let base: string
+  let workspace: string
+  let launch: string
+  let fenced: Context
+  let fencedRemote: DiagramRemote
+
+  beforeEach(async ({ onTestFinished }) => {
+    base = await mkdtemp(join(outsideTempWorkspaceParent(), '.dsh-diagram-remote-sbx-'))
+    onTestFinished(async () => { await rm(base, { recursive: true, force: true }) })
+    assertWorkspaceOutsideTemp(base)
+    workspace = join(base, 'session-ws')
+    launch = join(base, 'launch-root')
+    await mkdir(workspace)
+    await mkdir(launch)
+    fenced = new Context()
+    await fenced.plugin(SessionProjectionRegistry)
+    await fenced.plugin(SandboxPolicyService, { mode: 'workspace-write', workspaceRoot: launch })
+    const id = SessionId('remote-sbx-session')
+    const session = Session.create(id, undefined, {
+      version: SESSION_FORMAT_VERSION,
+      id,
+      createdAt: 0,
+      cwd: workspace,
+      isSeeded: false,
+    })
+    fenced.provide('sessions', { get: (sessionId: string) => sessionId === 'remote-sbx-session' ? session : undefined })
+    await fenced.plugin(SandboxedFileSystem, { cwd: launch })
+    await fenced.plugin(DiagramRemote)
+    fencedRemote = fenced.get('diagram') as DiagramRemote
+  })
+
+  afterEach(async () => {
+    await fenced.fiber?.dispose()
+  })
+
+  it('stamps the named session policy so the save reaches the session workspace', async () => {
+    const result = await fencedRemote.save({
+      path: 'flow.excalidraw',
+      content: DOCUMENT,
+      sessionId: 'remote-sbx-session',
+    })
+    expect(result).toMatchObject({ ok: true, path: join(workspace, 'flow.excalidraw') })
+    if (result.ok) expect(await readFile(join(workspace, 'flow.excalidraw'), 'utf8')).toBe(DOCUMENT)
+  })
+
+  it('falls back to the configured root for an agentless save', async () => {
+    const result = await fencedRemote.save({ path: 'flow.excalidraw', content: DOCUMENT })
+    expect(result).toMatchObject({ ok: true, path: join(launch, 'flow.excalidraw') })
+    if (result.ok) expect(await readFile(join(launch, 'flow.excalidraw'), 'utf8')).toBe(DOCUMENT)
   })
 })

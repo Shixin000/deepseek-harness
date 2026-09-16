@@ -73,9 +73,10 @@ Every shape except `text` also accepts `strokeColor`, `fillColor` (hex triplet o
 
 - `src/spec.ts` validates the constraints the runtime schema cannot express: finite geometry, positive sizes, connector point counts, color formats, and bounded fields.
 - `src/expand.ts` maps each spec shape to an Excalidraw element (`rectangle`/`ellipse`/`diamond`/`text`/`line`/`arrow`) with stable ids (`diagram-1`, …), relative connector points, and label texts as standalone centered text elements; `diagramBounds` computes the canvas size from the spec.
-- `src/write.ts` assembles the `.excalidraw` envelope (`type: 'excalidraw'`, `version: 2`, `elements`, `appState`, `files: {}`) and writes it through `ctx.fs` with the shared `fs/write-intent` waterfall and a `fs/observed` `present` observation, so the session's sandbox and observation policy apply.
+- `src/write.ts` assembles the `.excalidraw` envelope (`type: 'excalidraw'`, `version: 2`, `elements`, `appState`, `files: {}`) and writes it through `ctx.fs` with the shared `fs/write-intent` waterfall, the calling session's resolved sandbox policy stamped on the mutation, and a `fs/observed` `present` observation, so a confining filesystem fences the write by the session workspace.
+- `src/sandbox.ts` resolves that per-call policy and the working directory both paths resolve against, so path resolution and the fence share one workspace root; an agentless caller uses the configured fallback root.
 - `src/read-tool.ts` parses and summarizes an existing document with the same validation spirit as the write path: malformed elements are skipped, geometry coerces to finite numbers, and the summary is bounded by the element cap with an explicit total.
-- `src/remote.ts` backs the interactive whiteboard (`diagram.save`/`diagram.read` Remote methods) and records the log-only `diagram/saved` session event when the caller attaches a session id.
+- `src/remote.ts` backs the interactive whiteboard (`diagram.save`/`diagram.read` Remote methods), resolves the named session for its save policy, and records the log-only `diagram/saved` session event when the caller attaches a session id.
 - `src/index.ts` registers both tools, the `tool:diagram` and `tool:diagram_read` system-prompt sections, and the replayable `presentationMeta` projection.
 - No runtime invariant companion is published because tool registration is a registry-owned effect (disposal proven by the HMR-safety spec) and the validation/expansion pipeline is pure over its inputs; the package emits no cordis events.
 

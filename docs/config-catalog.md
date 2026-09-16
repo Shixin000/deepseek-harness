@@ -556,7 +556,7 @@ export interface Config {
 }
 ```
 
-Source: [`packages/drawing/diagram/src/index.ts:35`](../packages/drawing/diagram/src/index.ts)
+Source: [`packages/drawing/diagram/src/index.ts:36`](../packages/drawing/diagram/src/index.ts)
 
 <a id="deepseek-aidsh-e2b"></a>
 

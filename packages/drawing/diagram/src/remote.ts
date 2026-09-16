@@ -2,33 +2,43 @@
  * Host-side Remote gateway for the interactive whiteboard: saves the edited
  * Excalidraw scene back into the session workspace and reads an existing
  * `.excalidraw` file for re-opening. The write goes through `ctx.fs` like the
- * `diagram` tool, so the session's sandbox applies; a session event for the
- * save is deferred until canvas content enters a model request (the M-C
- * milestone), per the model-visible ⟺ logged rule.
+ * `diagram` tool, so the calling session's sandbox policy applies; a save also
+ * records the log-only `diagram/saved` session event for the owning session,
+ * per the model-visible ⟺ logged rule.
  * @module @deepseek-ai/dsh-diagram/remote
  */
 
 import type { Context } from '@deepseek-ai/cordis'
 import type { FsTarget, FsWriteOutcome } from '@deepseek-ai/dsh-fs'
 import type {} from '@deepseek-ai/dsh-fs'
+import type { SandboxExecutionPolicy } from '@deepseek-ai/dsh-sandbox'
+import { SessionId, type Session } from '@deepseek-ai/dsh-session'
 import { Remote, TypertRemoteService } from '@deepseek-ai/dsh-typert-protocol'
 import type { DiagramReadRequest, DiagramReadResult, DiagramSaveRequest, DiagramSaveResult } from './types.ts'
 import type {} from '@deepseek-ai/dsh-session/types'
 import { DIAGRAM_EXTENSION } from './write.ts'
+import { diagramResolutionCwd, diagramSandboxPolicy } from './sandbox.ts'
 
 /** Inclusive byte cap for one canvas read; larger files fail explicitly. */
 export const DIAGRAM_READ_MAX_BYTES = 16 * 1024 * 1024
 
-/** Validate and resolve the requested path (absolute, or backend-default cwd). */
+/**
+ * Validate and resolve the requested path against the workspace the mutation
+ * will be fenced by: the policy's root when a policy exists, else the
+ * backend-default cwd (absolute paths are unaffected).
+ */
 async function resolveDiagramTarget(
   ctx: Context,
   path: string,
+  policy: SandboxExecutionPolicy | undefined,
+  sessionCwd: string | undefined,
 ): Promise<{ ok: true; target: FsTarget } | { ok: false; message: string }> {
   const trimmed = path.trim()
   if (trimmed.length === 0 || !trimmed.toLowerCase().endsWith(DIAGRAM_EXTENSION)) {
     return { ok: false, message: `path must end with ${DIAGRAM_EXTENSION}` }
   }
-  const target = await ctx.fs.resolve(trimmed)
+  const cwd = diagramResolutionCwd(policy, sessionCwd)
+  const target = await ctx.fs.resolve(trimmed, cwd === undefined ? undefined : { cwd })
   return { ok: true, target }
 }
 
@@ -50,11 +60,13 @@ export class DiagramRemote extends TypertRemoteService {
    */
   @Remote('save')
   async save(request: DiagramSaveRequest): Promise<DiagramSaveResult> {
-    const resolved = await resolveDiagramTarget(this.ctx, request.path)
+    const session = sessionOf(this.ctx, request.sessionId)
+    const policy = diagramSandboxPolicy(this.ctx, session)
+    const resolved = await resolveDiagramTarget(this.ctx, request.path, policy, session?.header.cwd)
     if (!resolved.ok) return { ok: false, code: 'invalid-path', message: resolved.message }
     let outcome: FsWriteOutcome
     try {
-      outcome = await this.ctx.fs.writeText(resolved.target, request.content)
+      outcome = await this.ctx.fs.writeText(resolved.target, request.content, undefined, undefined, policy)
       void outcome
     } catch (error: unknown) {
       return {
@@ -65,7 +77,7 @@ export class DiagramRemote extends TypertRemoteService {
       }
     }
     const bytes = new TextEncoder().encode(request.content).byteLength
-    recordDiagramSave(this.ctx, request.sessionId, resolved.target.displayPath, request.content)
+    recordDiagramSave(session, resolved.target.displayPath, request.content)
     return { ok: true, path: resolved.target.displayPath, bytes }
   }
 
@@ -76,7 +88,8 @@ export class DiagramRemote extends TypertRemoteService {
    */
   @Remote('read')
   async read(request: DiagramReadRequest): Promise<DiagramReadResult> {
-    const resolved = await resolveDiagramTarget(this.ctx, request.path)
+    const policy = diagramSandboxPolicy(this.ctx, undefined)
+    const resolved = await resolveDiagramTarget(this.ctx, request.path, policy, undefined)
     if (!resolved.ok) return { ok: false, code: 'invalid-path', message: resolved.message }
     let bytes: Uint8Array
     try {
@@ -111,13 +124,19 @@ function countElements(content: string): number {
 }
 
 /**
+ * The owning session for a Remote request, when the caller names one and the
+ * Host session store has it. Absent for agentless callers (the panel runs at
+ * root scope and sends no id) and for an unknown or expired id.
+ */
+function sessionOf(ctx: Context, sessionId: string | undefined): Session | undefined {
+  return sessionId === undefined ? undefined : ctx.get('sessions')?.get(SessionId(sessionId))
+}
+
+/**
  * Record the log-only `diagram/saved` event for the owning session, when one
  * is attached. The save itself never depends on this: a session-less caller
  * (or a Host without the session store) simply skips the event.
  */
-function recordDiagramSave(ctx: Context, sessionId: string | undefined, path: string, content: string): void {
-  if (sessionId === undefined) return
-  const sessions = ctx.get('sessions') as { get(id: string): { append(type: string, data: object): void } | undefined } | undefined
-  const session = sessions?.get(sessionId)
+function recordDiagramSave(session: Session | undefined, path: string, content: string): void {
   session?.append('diagram/saved', { path, elementCount: countElements(content) })
 }

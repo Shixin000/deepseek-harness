@@ -20,6 +20,7 @@ import { validateShapes } from './spec.ts'
 import type { DiagramShape } from './spec.ts'
 import { parseDiagramFile, serializeDiagram, writeDiagram } from './write.ts'
 import { applyReadTool } from './read-tool.ts'
+import { diagramResolutionCwd, diagramSandboxPolicy } from './sandbox.ts'
 export { DiagramRemote } from './remote.ts'
 export type {
   DiagramReadRequest, DiagramReadResult, DiagramRemoteFailure, DiagramSaveRequest, DiagramSaveResult,
@@ -295,10 +296,11 @@ export function apply(ctx: Context, config: Config): void {
       const bounds = diagramBounds(args.elements)
       const json = serializeDiagram(elements)
       const resolveOptions: { cwd?: string; signal?: AbortSignal } = { signal: exec.signal }
-      const cwd = sessionCwd(exec)
+      const policy = diagramSandboxPolicy(ctx, exec.agent?.session)
+      const cwd = diagramResolutionCwd(policy, sessionCwd(exec))
       if (cwd !== undefined) resolveOptions.cwd = cwd
       const target: FsTarget = await ctx.fs.resolve(file, resolveOptions)
-      await writeDiagram(ctx, target, json, exec.signal, exec)
+      await writeDiagram(ctx, target, json, exec.signal, exec, policy)
       return {
         path: target.displayPath,
         elementCount: elements.length,

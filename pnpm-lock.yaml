@@ -5420,9 +5420,21 @@ importers:
       '@deepseek-ai/dsh-fs-local':
         specifier: workspace:^
         version: link:../../fs/fs-local
+      '@deepseek-ai/dsh-fs-sandbox':
+        specifier: workspace:^
+        version: link:../../fs/fs-sandbox
+      '@deepseek-ai/dsh-sandbox':
+        specifier: workspace:^
+        version: link:../../sandbox/sandbox
+      '@deepseek-ai/dsh-sandbox-policy':
+        specifier: workspace:^
+        version: link:../../sandbox/sandbox-policy
       '@deepseek-ai/dsh-session':
         specifier: workspace:^
         version: link:../../core/session
+      '@deepseek-ai/dsh-session-projection':
+        specifier: workspace:^
+        version: link:../../session/session-projection
       '@deepseek-ai/dsh-system-prompt':
         specifier: workspace:^
         version: link:../../core/system-prompt
