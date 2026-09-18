@@ -62,6 +62,8 @@ function bench(initial: { open: boolean; path: string }) {
     t,
     useResource,
     usePanelInfo,
+    useSessionStatus: (() => undefined) as never,
+    useSessionRetainInfo: (() => undefined) as never,
     useSessions: (() => []) as never,
     useSessionPendingInteraction: (() => undefined) as never,
     useWorkspaces: (() => []) as never,

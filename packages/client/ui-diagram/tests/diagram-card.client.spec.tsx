@@ -31,6 +31,8 @@ function props(block: ToolCallBlock, openFile = vi.fn()) {
     useResource,
     usePanelInfo,
     useSession: (() => undefined) as never,
+    useSessionStatus: (() => undefined) as never,
+    useSessionRetainInfo: (() => undefined) as never,
     useSessions: (() => []) as never,
     useWorkspaces: (() => []) as never,
     useProjection: (() => undefined) as never,
