@@ -6,15 +6,16 @@
  * and drains started calls.
  *
  * Abort records synthetic error results for skipped calls so replay stays
- * valid. A terminal scheduler failure preserves already-recorded `tool/call`
- * events without fabricating results.
+ * valid. A terminal scheduler failure seals every recorded `tool/call` with an
+ * error result before rejecting, because a recorded call without a result
+ * invalidates the provider transcript for the rest of the session.
  * @module dsh-agent-loop/tool-calls
  */
 
 import type { Context } from '@deepseek-ai/cordis'
 import { createToolResultMessage, type ToolCallBlock } from '@deepseek-ai/dsh-llm'
 import type { Session, SessionSeq, UserMessage } from '@deepseek-ai/dsh-session'
-import { TOOL_ABORTED_BEFORE_DISPATCH, TOOL_RUNTIME_SCHEDULER, type ToolExecutionInput, type ToolExecutionMode, type ToolExecutionResult, type ToolRunContext } from '@deepseek-ai/dsh-tools'
+import { TOOL_ABORTED, TOOL_ABORTED_BEFORE_DISPATCH, TOOL_RUNTIME_SCHEDULER, type ToolExecutionInput, type ToolExecutionMode, type ToolExecutionResult, type ToolRunContext } from '@deepseek-ai/dsh-tools'
 import { assertNever } from '@deepseek-ai/dsh-util-values'
 
 /** One tool call after argument parsing, ready to schedule. */
@@ -45,8 +46,8 @@ interface GroupOutcome {
  * the signal still aborted after accepting started-call context through the
  * caller-supplied acceptor (the machine stages it in its next-step inbox for the
  * step boundary). An internal scheduler failure stops new dispatches, drains
- * already-started dispatches, and rejects with the first failure without
- * fabricating tool results.
+ * already-started dispatches, records an error result for every call it already
+ * persisted, and rejects with the first failure.
  * The committed step's AgentLoop driver boundary supplies the initiating Agent
  * that becomes each explicit {@link ToolExecutionInput.agent}.
  *
@@ -116,8 +117,8 @@ function parseArguments(raw: string): unknown {
  * drain and remains for the caller's next barrier. Results and contexts commit
  * in model order. Abort stops starts, drains and commits started calls, accepts
  * their contexts into the owning batch, records results for skipped calls, and
- * returns an aborted outcome. Scheduler failure drains dispatches without
- * committing synthetic recovery results.
+ * returns an aborted outcome. Scheduler failure drains dispatches, seals every
+ * recorded call with an error result, and rethrows the first failure.
  */
 async function runGroup(
   ctx: Context,
@@ -213,6 +214,31 @@ async function runGroup(
     }
   }
 
+  /**
+   * A recorded `tool/call` without a result makes the provider transcript invalid
+   * for every later request in this session, so a terminal scheduler failure seals
+   * each call it already recorded before rejecting. Sealing never masks the
+   * failure that caused it.
+   */
+  const sealPersistedCalls = (): void => {
+    for (let index = committed; index < started; index++) {
+      // oxlint-disable-next-line typescript/no-non-null-assertion -- bounded by the started counter
+      const call = group[index]!
+      // oxlint-disable-next-line typescript/no-non-null-assertion -- appended before `started` advances
+      const callSeq = callSeqs[index]!
+      /* v8 ignore start -- a rejecting session append must not mask the scheduler failure */
+      try {
+        appendAbortedToolResult(
+          session, turn, step, call.block, callSeq,
+          'tool call aborted before a result was recorded', TOOL_ABORTED,
+        )
+      } catch {
+        /* The session rejected the seal; the scheduler failure still surfaces. */
+      }
+      /* v8 ignore stop */
+    }
+  }
+
   // Ordered pre-execute may await; only dispatch/body overlaps. A scheduler
   // failure stops new dispatches and reaches the turn boundary after every
   // already-started dispatch settles.
@@ -232,6 +258,7 @@ async function runGroup(
   } catch (error: unknown) {
     schedulerFailure ??= { error }
     await Promise.allSettled(inFlight.values())
+    sealPersistedCalls()
     throw schedulerFailure.error
   }
 
@@ -249,12 +276,28 @@ async function runGroup(
 /** Append the durable call/result pair for a model call skipped after cancellation. */
 function appendSkippedToolCall(session: Session, turn: number, step: number, block: ToolCallBlock): void {
   const callSeq = appendToolCall(session, turn, step, block)
+  appendAbortedToolResult(
+    session, turn, step, block, callSeq,
+    'tool call aborted before dispatch', TOOL_ABORTED_BEFORE_DISPATCH,
+  )
+}
+
+/** Append the error result that closes an abandoned call, citing its `tool/call` event. */
+function appendAbortedToolResult(
+  session: Session,
+  turn: number,
+  step: number,
+  block: ToolCallBlock,
+  callSeq: SessionSeq,
+  message: string,
+  code: string,
+): void {
   appendToolResult(session, turn, step, block, {
-    content: [{ type: 'text', text: 'Error: tool call aborted before dispatch' }],
+    content: [{ type: 'text', text: `Error: ${message}` }],
     isError: true,
     error: {
-      message: 'tool call aborted before dispatch',
-      info: { name: 'AbortError', code: TOOL_ABORTED_BEFORE_DISPATCH },
+      message,
+      info: { name: 'AbortError', code },
     },
   }, callSeq)
 }

@@ -702,6 +702,39 @@ describe('tool-call scheduler: failure quiescence', () => {
     expect(events(agent).findLast(event => event.type === 'turn/end')).toMatchObject({
       data: { reason: { kind: 'error', error: { message: schedulerError.message, code: 'UNKNOWN' } } },
     })
+    // Every recorded call must carry a result. An unanswered `tool/call` makes
+    // every later request in this session fail provider validation, so the
+    // failure path seals the calls it already persisted.
+    const calls = events(agent).filter(event => event.type === 'tool/call')
+    const results = events(agent).filter(event => event.type === 'tool/result')
+    expect(calls).toHaveLength(3)
+    expect(results.map(event => String(event.data.message.source.callId)).sort())
+      .toEqual(calls.map(event => String(event.data.callId)).sort())
+  })
+
+  it('seals a call whose prepare fails before dispatch', async () => {
+    const adapter = new MockAdapter([multiCall([{ id: 'c1', name: 'p', args: { id: '1' } }])])
+    const ctx = await harness(adapter)
+    ctx.tools.register(gatedParallelTool('p').tool)
+    // A prepare rejection is the failure this boundary must seal: the call is
+    // already durable when it throws, so an unsealed call would make every later
+    // request in this session invalid.
+    const scheduler = ctx.tools[TOOL_RUNTIME_SCHEDULER]
+    const schedulerError = new Error('prepare exploded')
+    scheduler.prepare = async () => { throw schedulerError }
+    const agent = await ctx.agentLoop.create(SessionId('scheduler-prepare-failure'), { provider: 'mock', model: 'mock' })
+    const idlePromise = waitForIdle(ctx, agent)
+
+    agent.followup(createUserMessage({ content: [{ type: 'text', text: 'go' }], source: { kind: 'user' } }))
+    await idlePromise
+
+    expect(events(agent).findLast(event => event.type === 'turn/end')).toMatchObject({
+      data: { reason: { kind: 'error', error: { message: schedulerError.message, code: 'UNKNOWN' } } },
+    })
+    const calls = events(agent).filter(event => event.type === 'tool/call')
+    const results = events(agent).filter(event => event.type === 'tool/result')
+    expect(calls.map(event => String(event.data.callId))).toEqual(['c1'])
+    expect(results.map(event => String(event.data.message.source.callId))).toEqual(['c1'])
   })
 })
 
