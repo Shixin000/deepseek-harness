@@ -131,7 +131,7 @@ describe('CanvasPanel', () => {
 
   it('reloads from disk into a clean scene and remounts the editor', async () => {
     const { instance, reload, props } = bench({ open: true, path: '/ws/flow.excalidraw' })
-    const scene = { elements: [{ id: 'disk' }], appState: { viewBackgroundColor: '#fff' }, files: {} } as unknown as CanvasScene
+    const scene = { elements: [{ id: 'disk' }], appState: { viewBackgroundColor: '#fff' }, files: {} } as never
     reload.mockResolvedValue(scene)
     const { getByTestId, getByText } = render(<CanvasPanel {...props} />)
     const before = Number(getByTestId('mock-excalidraw').dataset.mounts)

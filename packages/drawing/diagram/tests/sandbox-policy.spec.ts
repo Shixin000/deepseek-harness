@@ -24,6 +24,7 @@ import SandboxPolicyService from '@deepseek-ai/dsh-sandbox-policy'
 import SandboxedFileSystem from '@deepseek-ai/dsh-fs-sandbox'
 import * as Diagram from '@deepseek-ai/dsh-diagram'
 import { assertWorkspaceOutsideTemp, outsideTempWorkspaceParent } from '../../../../scripts/snapshot-workspace-parent.ts'
+import { loaderInternalStub } from './loader-module-stub.ts'
 
 let base: string | undefined
 let context: Context | undefined
@@ -101,13 +102,7 @@ async function boot(): Promise<{ ctx: Context; workspace: string; launch: string
     ['@deepseek-ai/dsh-fs-sandbox', SandboxedFileSystem],
     ['@deepseek-ai/dsh-diagram', Diagram],
   ])
-  ctx.loader.internal = {
-    version: 'v2',
-    async import(specifier: string) {
-      if (!modules.has(specifier)) throw new Error(`unexpected Loader import: ${specifier}`)
-      return modules.get(specifier)
-    },
-  } as unknown as NonNullable<typeof ctx.loader.internal>
+  ctx.loader.internal = loaderInternalStub(modules)
   await ctx.loader.create({ name: 'cordis:include', config: { path: pathToFileURL(configPath).href } })
   await ctx.loader.await()
   return { ctx, workspace, launch }

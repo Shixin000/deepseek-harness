@@ -25,7 +25,7 @@ type DiagramCardProps = ToolCallViewProps
 function diagramFile(argsRaw: string): string {
   if (argsRaw === '') return ''
   try {
-    const parsed = JSON.parse(argsRaw) as unknown
+    const parsed: unknown = JSON.parse(argsRaw)
     if (typeof parsed === 'object' && parsed !== null) {
       const file = (parsed as Record<string, unknown>).file
       if (typeof file === 'string' && file !== '') return file
@@ -44,7 +44,22 @@ function basename(path: string): string {
 }
 
 /** Replay-stable diagram card over the durable call/result slice. */
-export function DiagramCard({ block, openFile, renderSlotChain, t }: DiagramCardProps) {
+export function DiagramCard(props: DiagramCardProps) {
+  return props.phase === 'preparing' ? <PreparingDiagramCard {...props} /> : <StartedDiagramCard {...props} />
+}
+
+function PreparingDiagramCard({ t }: Extract<DiagramCardProps, { phase: 'preparing' }>) {
+  return (
+    <div className={css.card}>
+      <div className={css.header}>
+        <span className={css.title}>{t('card.title')}</span>
+      </div>
+      <div className={css.body}><p className={css.note}>{t('card.pending')}</p></div>
+    </div>
+  )
+}
+
+function StartedDiagramCard({ block, openFile, renderSlotChain, t }: Exclude<DiagramCardProps, { phase: 'preparing' }>) {
   const settled = 'kind' in block
   const argsRaw = (settled ? block.call?.argsRaw : block.argsRaw) ?? ''
   const file = diagramFile(argsRaw)

@@ -19,15 +19,21 @@ const t = makeTranslate(zh, en)
 const useResource = (() => ({ status: 'none' as const, value: undefined, failure: undefined, reload: () => {} })) as GlobalStandardProps['useResource']
 const usePanelInfo: GlobalStandardProps['usePanelInfo'] = selector => selector({ activePanelId: null })
 
+type Props = Parameters<typeof DiagramCard>[0]
+
 /** Minimal props the card reads; t is the real localized translate. */
-function props(block: ToolCallBlock, openFile = vi.fn()) {
+function props(phase: 'start' | 'result', block: ToolCallBlock, openFile = vi.fn()): Props {
+  const staged = phase === 'result'
+    ? { phase: 'result' as const, block }
+    : { phase: 'start' as const, block }
   return {
+    ...staged,
     toolName: 'diagram',
     callId: 'call-1',
-    block,
     t,
     openFile,
     loadImage: (() => undefined) as never,
+    useDisclosure: (() => ({ expanded: false, setExpanded: () => {}, toggle: () => {} })) as never,
     useResource,
     usePanelInfo,
     useSession: (() => undefined) as never,
@@ -47,7 +53,7 @@ function props(block: ToolCallBlock, openFile = vi.fn()) {
     renderSlotChain: (() => null) as never,
     useStore: (() => undefined) as never,
     SessionProvider: (() => null) as never,
-  }
+  } as never
 }
 
 const ARGS = JSON.stringify({ file: '/ws/flow.excalidraw', elements: [] })
@@ -65,7 +71,8 @@ const META = {
 
 describe('DiagramCard', () => {
   it('shows a pending note for a running call', () => {
-    const { getByText } = render(<DiagramCard {...props({
+    const { getByText } = render(<DiagramCard {...props('start', {
+      phase: 'start',
       callId: 'call-1',
       name: 'diagram',
       argsRaw: ARGS,
@@ -78,7 +85,7 @@ describe('DiagramCard', () => {
   })
 
   it('shows a failure note for a settled error', () => {
-    const { getByText } = render(<DiagramCard {...props({
+    const { getByText } = render(<DiagramCard {...props('result', {
       kind: 'tool-result',
       seq: 1,
       time: 2,
@@ -94,7 +101,7 @@ describe('DiagramCard', () => {
 
   it('renders the SVG from valid meta with the shape count and an open action', () => {
     const openFile = vi.fn()
-    const { getByTestId, getByText } = render(<DiagramCard {...props({
+    const { getByTestId, getByText } = render(<DiagramCard {...props('result', {
       kind: 'tool-result',
       seq: 1,
       time: 2,
@@ -114,7 +121,7 @@ describe('DiagramCard', () => {
   })
 
   it('falls back to the no-preview note for settled calls without valid meta', () => {
-    const { getByText, queryByTestId } = render(<DiagramCard {...props({
+    const { getByText, queryByTestId } = render(<DiagramCard {...props('result', {
       kind: 'tool-result',
       seq: 1,
       time: 2,
@@ -131,7 +138,7 @@ describe('DiagramCard', () => {
   })
 
   it('omits the file chip and open action when the args are not parseable', () => {
-    const { queryByText } = render(<DiagramCard {...props({
+    const { queryByText } = render(<DiagramCard {...props('result', {
       kind: 'tool-result',
       seq: 1,
       time: 2,
@@ -148,7 +155,7 @@ describe('DiagramCard', () => {
   })
 
   it('omits the file chip for empty args or args without a file field', () => {
-    const empty = render(<DiagramCard {...props({
+    const empty = render(<DiagramCard {...props('result', {
       kind: 'tool-result',
       seq: 1,
       time: 2,
@@ -162,7 +169,7 @@ describe('DiagramCard', () => {
     })} />)
     expect(empty.queryByText('flow.excalidraw')).toBeNull()
 
-    const noFile = render(<DiagramCard {...props({
+    const noFile = render(<DiagramCard {...props('result', {
       kind: 'tool-result',
       seq: 1,
       time: 2,
@@ -178,7 +185,7 @@ describe('DiagramCard', () => {
   })
 
   it('renders without a file chip when the call head is outside the window', () => {
-    const { queryByText } = render(<DiagramCard {...props({
+    const { queryByText } = render(<DiagramCard {...props('result', {
       kind: 'tool-result',
       seq: 1,
       time: 2,
@@ -195,7 +202,7 @@ describe('DiagramCard', () => {
   })
 
   it('shows a bare filename without directory separators as-is', () => {
-    const { getByText } = render(<DiagramCard {...props({
+    const { getByText } = render(<DiagramCard {...props('result', {
       kind: 'tool-result',
       seq: 1,
       time: 2,
@@ -211,7 +218,7 @@ describe('DiagramCard', () => {
   })
 
   it('does not offer an open action on a failed call even with a file', () => {
-    const { queryByText } = render(<DiagramCard {...props({
+    const { queryByText } = render(<DiagramCard {...props('result', {
       kind: 'tool-result',
       seq: 1,
       time: 2,
