@@ -1,6 +1,13 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for drawing.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/subsystems/drawing.md
-drawing.md: a8767a34e4a69e49d2d99a25dca8eafb75327d7f
-drawing.zh.md: a2cad302cd08faa49ed8a21255a018cd74f4b863
+/drawing:
+  en: 1ebaab43c8dd9c90
+  zh: 6d64cfa651118eaa
+/drawing/the-shape-spec-one-callable-vocabulary:
+  en: 47b75c5de8dba0c9
+  zh: 8b4ccd29efae8545
+/drawing/deterministic-expansion:
+  en: 3bcc71a960c3a7f2
+  zh: 4a3ea676539ef2b4

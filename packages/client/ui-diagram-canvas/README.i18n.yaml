@@ -1,6 +1,40 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/client/ui-diagram-canvas/README.md
-README.md: b870dd68d8ba1707e919aa9a6973ad1e80fa4a22
-README.zh.md: 5bd2bf795fa264a98f1a8b5b4528b055ea5808bb
+/:
+  en: 941a24d0c985aa13
+  zh: e4c85892c93e638f
+/deepseek-ai-dsh-client-ui-diagram-canvas:
+  en: 91cd2f4bb0020caf
+  zh: ce4c5a05e4239313
+/deepseek-ai-dsh-client-ui-diagram-canvas/summary:
+  en: d9dbbfd90d79ea88
+  zh: 645175dc3c74a130
+/deepseek-ai-dsh-client-ui-diagram-canvas/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 09388d293f9be9cb
+/deepseek-ai-dsh-client-ui-diagram-canvas/use-this-package:
+  en: c3b84ef599cd23f5
+  zh: f8bcedda56b94404
+/deepseek-ai-dsh-client-ui-diagram-canvas/use-this-package/the-shared-canvas-instance:
+  en: aca3d9b38678e600
+  zh: e925aba5b6c9e345
+/deepseek-ai-dsh-client-ui-diagram-canvas/understand-the-implementation:
+  en: 3403947fd2ade270
+  zh: 43332f8efe8d32a9
+/deepseek-ai-dsh-client-ui-diagram-canvas/further-exploration:
+  en: 1e970ee72b7898df
+  zh: db5fd2c92c8a2b01
+/deepseek-ai-dsh-client-ui-diagram-canvas/model-experience:
+  en: 074d05deb6e9d285
+  zh: 28dd746d94246a1f
+/deepseek-ai-dsh-client-ui-diagram-canvas/model-experience/kv-cache-effect:
+  en: ca75c51c89c2c9b0
+  zh: a756911ef2edb7bf
+/deepseek-ai-dsh-client-ui-diagram-canvas/known-limitations-and-deferred-work:
+  en: 2771883307ce4983
+  zh: a4c65f404b258753
+/deepseek-ai-dsh-client-ui-diagram-canvas/known-limitations-and-deferred-work/dev-note:
+  en: e67f633dc6fe7773
+  zh: 3bb0c20c93f16f98

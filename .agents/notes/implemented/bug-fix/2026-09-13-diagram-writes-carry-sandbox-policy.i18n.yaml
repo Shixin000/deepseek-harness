@@ -1,6 +1,19 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for 2026-09-13-diagram-writes-carry-sandbox-policy.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/bug-fix/2026-09-13-diagram-writes-carry-sandbox-policy.md
-2026-09-13-diagram-writes-carry-sandbox-policy.md: 4768679b7c91ec67c202ec0b0bc75113712d7153
-2026-09-13-diagram-writes-carry-sandbox-policy.zh.md: d458f5b47459229e46067cec2a22da45eb5c1ff5
+/agent-note-diagram-writes-carry-the-calling-session-s-sandbox-policy:
+  en: bee60fb60de98eff
+  zh: c48881711c1ec74d
+/agent-note-diagram-writes-carry-the-calling-session-s-sandbox-policy/problem:
+  en: ca164a9140af2bb2
+  zh: 747cc1a4b9ee5828
+/agent-note-diagram-writes-carry-the-calling-session-s-sandbox-policy/decision:
+  en: f3808b7d6a67dd89
+  zh: 1be2ecc493615e7d
+/agent-note-diagram-writes-carry-the-calling-session-s-sandbox-policy/alternatives-considered:
+  en: 973b1de01838ca8c
+  zh: 571e0f274f815e6c
+/agent-note-diagram-writes-carry-the-calling-session-s-sandbox-policy/consequences:
+  en: 04cf37ed5dada3d0
+  zh: 114afcde2e5b018d

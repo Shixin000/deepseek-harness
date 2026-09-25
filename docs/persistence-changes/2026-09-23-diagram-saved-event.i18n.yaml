@@ -1,6 +1,28 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for 2026-09-23-diagram-saved-event.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/persistence-changes/2026-09-23-diagram-saved-event.md
-2026-09-23-diagram-saved-event.md: 68f3a94a1e1e52ed1b7c0606090e3693b54cbf5c
-2026-09-23-diagram-saved-event.zh.md: c1822daffa1bb364d4a71800384ea1977aa553cc
+/:
+  en: 3d5a424ae7d7e46b
+  zh: c22a8e4a62d8cc1a
+/2026-09-23-diagram-saved-event:
+  en: ce463367b7a4b77d
+  zh: 73531ff5de7d0be9
+/2026-09-23-diagram-saved-event/summary:
+  en: b7575ba42c3b596b
+  zh: 3fabe61af9afa75f
+/2026-09-23-diagram-saved-event/table-of-contents:
+  en: 6cf314a069ceb451
+  zh: 9adff678e9ecab3b
+/2026-09-23-diagram-saved-event/declaration:
+  en: 6907136f28e48c90
+  zh: 02f8298485f3d8e7
+/2026-09-23-diagram-saved-event/compatibility:
+  en: a039ed8eb91509eb
+  zh: cf84adc6ca2031b4
+/2026-09-23-diagram-saved-event/verification:
+  en: 06902644236ea1ae
+  zh: 6909d4dca81daa15
+/2026-09-23-diagram-saved-event/dev-note:
+  en: b75c8458928b72b9
+  zh: 003ba4e17b4b5269

@@ -1,6 +1,37 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for 2026-09-01-interactive-whiteboard-excalidraw.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-09-01-interactive-whiteboard-excalidraw.md
-2026-09-01-interactive-whiteboard-excalidraw.md: 5dfd7f2f7417bb362a5fb03f36c417bdd9d72872
-2026-09-01-interactive-whiteboard-excalidraw.zh.md: a834b021ebcfdb402cfa7b5d44dfbb4253a196da
+/agent-note-the-interactive-whiteboard-excalidraw-editor-over-the-diagram-card:
+  en: cebe2bfec04662cf
+  zh: 25452861499002b1
+/agent-note-the-interactive-whiteboard-excalidraw-editor-over-the-diagram-card/problem:
+  en: a2897a01bb50152b
+  zh: 3c0fd67e510e2a0a
+/agent-note-the-interactive-whiteboard-excalidraw-editor-over-the-diagram-card/decision:
+  en: 9b6ab54c85bf7c91
+  zh: 03298d9ade650147
+/agent-note-the-interactive-whiteboard-excalidraw-editor-over-the-diagram-card/decision/embedding-the-editor-one-publishable-artifact:
+  en: cc9a4576c25159f2
+  zh: a72125a235ec6bd3
+/agent-note-the-interactive-whiteboard-excalidraw-editor-over-the-diagram-card/decision/one-canvas-instance-across-two-scopes:
+  en: dda2a8aea301346d
+  zh: 46dbb288d21d7624
+/agent-note-the-interactive-whiteboard-excalidraw-editor-over-the-diagram-card/decision/the-host-gateway:
+  en: de7dcb97e69d1191
+  zh: ba0282e9ab384bc4
+/agent-note-the-interactive-whiteboard-excalidraw-editor-over-the-diagram-card/decision/log-only-session-event:
+  en: 77245a0412e44c58
+  zh: 74f8d44d4bb2a0ec
+/agent-note-the-interactive-whiteboard-excalidraw-editor-over-the-diagram-card/why-no-cordis-catalog-entry-no-mode:
+  en: f54f54034d1b37da
+  zh: 218a52783ce2f5c4
+/agent-note-the-interactive-whiteboard-excalidraw-editor-over-the-diagram-card/alternatives-considered:
+  en: ac00c8f58b3936bf
+  zh: a98ca2aaac66049a
+/agent-note-the-interactive-whiteboard-excalidraw-editor-over-the-diagram-card/consequences:
+  en: 646ddb60337255f9
+  zh: b563e269f1fa7385
+/agent-note-the-interactive-whiteboard-excalidraw-editor-over-the-diagram-card/verification:
+  en: 92c5ebf515cfd274
+  zh: d5dad93e6f2b67d5

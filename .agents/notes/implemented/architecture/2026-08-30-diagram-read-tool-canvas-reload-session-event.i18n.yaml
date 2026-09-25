@@ -1,6 +1,19 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for 2026-08-30-diagram-read-tool-canvas-reload-session-event.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/architecture/2026-08-30-diagram-read-tool-canvas-reload-session-event.md
-2026-08-30-diagram-read-tool-canvas-reload-session-event.md: d9998a1ca1e3a6d2deed18e919a6803b2e33d84c
-2026-08-30-diagram-read-tool-canvas-reload-session-event.zh.md: 062767c69ac09d5b9ff4e8210520cbf9b49321a4
+/agent-note-diagram-read-tool-canvas-reload-and-the-diagram-saved-session-event:
+  en: 90c26fce97cc0143
+  zh: 9b6bd9082a3c9c38
+/agent-note-diagram-read-tool-canvas-reload-and-the-diagram-saved-session-event/problem:
+  en: 719ce7f061443492
+  zh: 315208c50e2d5639
+/agent-note-diagram-read-tool-canvas-reload-and-the-diagram-saved-session-event/decision:
+  en: e4cc3c0824b5c87a
+  zh: 0539c54700251757
+/agent-note-diagram-read-tool-canvas-reload-and-the-diagram-saved-session-event/alternatives-considered:
+  en: 64f29641ce5a050b
+  zh: 9b9e3389a8e58dad
+/agent-note-diagram-read-tool-canvas-reload-and-the-diagram-saved-session-event/consequences:
+  en: 28fa5544e70723a1
+  zh: f1b6030151b1de8d

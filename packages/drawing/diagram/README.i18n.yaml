@@ -1,6 +1,55 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/drawing/diagram/README.md
-README.md: 86416da0b3cd121fc991a3a07bf2976561f15e75
-README.zh.md: 4e401cf87960f9bb9e02c921524e10b72e21d3cc
+/:
+  en: da7f1fbdf7846d1f
+  zh: bfcd4f457c3e4296
+/deepseek-ai-dsh-diagram:
+  en: 322c92d92b4715f7
+  zh: 185f8d478ada2184
+/deepseek-ai-dsh-diagram/summary:
+  en: b8faf3bb96adf329
+  zh: db6ea050dd3682ea
+/deepseek-ai-dsh-diagram/table-of-contents:
+  en: f7e6f7f4ff7b5bcd
+  zh: cfd22e83bb9ed23a
+/deepseek-ai-dsh-diagram/use-this-package:
+  en: 413ca42e93849f16
+  zh: 9c37c50c71eaf90d
+/deepseek-ai-dsh-diagram/use-this-package/configuration:
+  en: 53b6d69fb4a657da
+  zh: 3749f20bc8404a0d
+/deepseek-ai-dsh-diagram/use-this-package/the-tool-contract:
+  en: ad480d265e962f10
+  zh: 0584d7ecbfe3c4ed
+/deepseek-ai-dsh-diagram/the-shape-spec:
+  en: 8c02a127730acd64
+  zh: 1de50a29e854343c
+/deepseek-ai-dsh-diagram/understand-the-implementation:
+  en: ad900b32ba9feda9
+  zh: 40f79d862501cebe
+/deepseek-ai-dsh-diagram/further-exploration:
+  en: 3125d15f6282b7bf
+  zh: 1c5a1f6687172760
+/deepseek-ai-dsh-diagram/model-experience:
+  en: 215e7ba838619b7b
+  zh: a311da3843709f90
+/deepseek-ai-dsh-diagram/model-experience/request-context-and-condition:
+  en: cd8530c72534ee6b
+  zh: 16dbf6046e7e51fd
+/deepseek-ai-dsh-diagram/model-experience/request-context-and-condition/what-the-model-sees:
+  en: 0bc0b59c5e7a88b0
+  zh: e5e8e7044f771b54
+/deepseek-ai-dsh-diagram/model-experience/request-context-and-condition/token-effect:
+  en: 510196f27eec9284
+  zh: 39b216483bd1553c
+/deepseek-ai-dsh-diagram/model-experience/request-context-and-condition/kv-cache-effect:
+  en: 7da4d338a45d3b26
+  zh: 62ad6a6e02e9992d
+/deepseek-ai-dsh-diagram/known-limitations-and-deferred-work:
+  en: 69759ac732d24173
+  zh: 7c0e27091339dccf
+/deepseek-ai-dsh-diagram/known-limitations-and-deferred-work/dev-note:
+  en: e67f633dc6fe7773
+  zh: 3bb0c20c93f16f98

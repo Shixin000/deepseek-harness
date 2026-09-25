@@ -1,6 +1,37 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for 2026-08-31-diagram-tool-excalidraw.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-08-31-diagram-tool-excalidraw.md
-2026-08-31-diagram-tool-excalidraw.md: cca16dd51ce50637fb103c4c8337e1a980ebdcab
-2026-08-31-diagram-tool-excalidraw.zh.md: fa0f84b8ed1da962961c256b8e8292b5a97b89ff
+/agent-note-the-diagram-tool-deterministic-excalidraw-diagrams-from-a-validated-shape-spec:
+  en: 9e611b9930b68d75
+  zh: 9b09e4b7f324e63c
+/agent-note-the-diagram-tool-deterministic-excalidraw-diagrams-from-a-validated-shape-spec/problem:
+  en: 50fcc784790a9c7d
+  zh: 2eacdae2e81acf05
+/agent-note-the-diagram-tool-deterministic-excalidraw-diagrams-from-a-validated-shape-spec/decision:
+  en: f1f59e428cca3437
+  zh: b0ee9ee205a37510
+/agent-note-the-diagram-tool-deterministic-excalidraw-diagrams-from-a-validated-shape-spec/decision/the-model-speaks-a-six-shape-spec-never-raw-excalidraw-json:
+  en: 33f5188000e6f0df
+  zh: 8d3a3d572bd2f7b3
+/agent-note-the-diagram-tool-deterministic-excalidraw-diagrams-from-a-validated-shape-spec/decision/small-canonical-value-elements-ride-only-in-the-replayable-projection:
+  en: cc3d32f717d4321b
+  zh: b5dbb8a74ef65697
+/agent-note-the-diagram-tool-deterministic-excalidraw-diagrams-from-a-validated-shape-spec/decision/read-only-rendering-without-the-excalidraw-runtime:
+  en: d34f8edcd0405109
+  zh: 0fcbed6339b381b5
+/agent-note-the-diagram-tool-deterministic-excalidraw-diagrams-from-a-validated-shape-spec/decision/the-write-goes-through-the-session-filesystem:
+  en: 6d4b6ad1961a3c52
+  zh: e6dcbb30172b6b9b
+/agent-note-the-diagram-tool-deterministic-excalidraw-diagrams-from-a-validated-shape-spec/why-no-cordis-catalog-entry-no-mode:
+  en: e49c7ae38d29d305
+  zh: 678562396a5c68fd
+/agent-note-the-diagram-tool-deterministic-excalidraw-diagrams-from-a-validated-shape-spec/alternatives-considered:
+  en: 71fd19a78e0f25a0
+  zh: 075c9de21991f148
+/agent-note-the-diagram-tool-deterministic-excalidraw-diagrams-from-a-validated-shape-spec/consequences:
+  en: 49db2f0ae702df20
+  zh: 5d89555b07619cfb
+/agent-note-the-diagram-tool-deterministic-excalidraw-diagrams-from-a-validated-shape-spec/verification:
+  en: 86bd3539130dcfdd
+  zh: 82bc33d86b0216ab
