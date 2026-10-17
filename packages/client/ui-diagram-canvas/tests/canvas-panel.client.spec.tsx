@@ -5,7 +5,7 @@
 import { afterEach } from 'vitest'
 import { cleanup, fireEvent, render } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import { makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
+import { allowAllAccess, makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
 import type { GlobalStandardProps } from '@deepseek-ai/dsh-client-ui-slots'
 
 import { createCanvasStore } from '../src/client/canvas-store.ts'
@@ -56,6 +56,7 @@ function bench(initial: { open: boolean; path: string }) {
   const save = vi.fn(async () => true)
   const reload = vi.fn(async () => null) as ReturnType<typeof vi.fn> & ((path: string) => Promise<CanvasScene | null>)
   const props = {
+    ...allowAllAccess,
     canvas: instance,
     save,
     reload,
