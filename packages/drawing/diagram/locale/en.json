@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Diagram tools",
+    "description": "Create Excalidraw diagrams from a shape spec, and read an existing diagram back as a bounded structural summary."
+  }
+}

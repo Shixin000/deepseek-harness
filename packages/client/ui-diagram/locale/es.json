@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Tarjeta de diagrama",
+    "description": "Muestra un diagrama creado por el modelo como una imagen de solo lectura dentro de la conversación."
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Herramientas de diagrama",
+    "description": "Crea diagramas de Excalidraw a partir de una especificación de formas y lee un diagrama existente como un resumen estructural acotado."
+  }
+}

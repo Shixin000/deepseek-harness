@@ -9,14 +9,13 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
+import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
 import { LocalFileSystem } from '@deepseek-ai/dsh-fs-local'
-import { ToolCallId } from '@deepseek-ai/dsh-llm'
 import type { FsObservation } from '@deepseek-ai/dsh-fs'
 import * as tool from '../src/index.ts'
 import { presentDiagramCall, presentDiagramResult } from '../src/index.ts'
 import type { DiagramShape } from '../src/spec.ts'
-
-const testToolSignal = new AbortController().signal
+import { executeTool } from './execute-tool.ts'
 
 let dir: string
 let ctx: Context
@@ -27,6 +26,7 @@ beforeEach(async () => {
   ctx = new Context()
   await ctx.plugin(SystemPrompt)
   await ctx.plugin(ToolRuntime)
+  await ctx.plugin(NativeToolExecutor)
   await ctx.plugin(LocalFileSystem, { cwd: dir })
   await ctx.plugin(tool)
   observed = []
@@ -42,13 +42,7 @@ afterEach(async () => {
 
 let callCounter = 0
 function callDiagram(args: unknown, cwd = dir) {
-  return ctx.tools.execute({
-    signal: testToolSignal,
-    callId: ToolCallId(`call-${++callCounter}`),
-    name: 'diagram',
-    arguments: args,
-    agent: { session: { header: { cwd } } } as never,
-  })
+  return executeTool(ctx, `call-${++callCounter}`, 'diagram', args, { session: { header: { cwd } } })
 }
 
 function text(result: { content: { type: string; text?: string }[] }): string {
@@ -168,16 +162,12 @@ describe('dsh-diagram tool', () => {
     const ctxCapped = new Context()
     await ctxCapped.plugin(SystemPrompt)
     await ctxCapped.plugin(ToolRuntime)
+  await ctxCapped.plugin(NativeToolExecutor)
     await ctxCapped.plugin(LocalFileSystem, { cwd: dir })
     await ctxCapped.plugin(tool, { maxElements: 2 })
     try {
-      const result = await ctxCapped.tools.execute({
-        signal: testToolSignal,
-        callId: ToolCallId('call-cap'),
-        name: 'diagram',
-        arguments: { file: 'cap.excalidraw', elements: SAMPLE },
-        agent: { session: { header: { cwd: dir } } } as never,
-      })
+      const result = await executeTool(ctxCapped, 'call-cap', 'diagram',
+        { file: 'cap.excalidraw', elements: SAMPLE }, { session: { header: { cwd: dir } } })
       expect(result.isError).toBe(true)
       expect(text(result)).toContain('at most 2 shapes')
     } finally {
@@ -189,16 +179,12 @@ describe('dsh-diagram tool', () => {
     const ctxCapped = new Context()
     await ctxCapped.plugin(SystemPrompt)
     await ctxCapped.plugin(ToolRuntime)
+  await ctxCapped.plugin(NativeToolExecutor)
     await ctxCapped.plugin(LocalFileSystem, { cwd: dir })
     await ctxCapped.plugin(tool, { maxMetaBytes: 64 })
     try {
-      const result = await ctxCapped.tools.execute({
-        signal: testToolSignal,
-        callId: ToolCallId('call-meta'),
-        name: 'diagram',
-        arguments: { file: 'meta.excalidraw', elements: SAMPLE },
-        agent: { session: { header: { cwd: dir } } } as never,
-      })
+      const result = await executeTool(ctxCapped, 'call-meta', 'diagram',
+        { file: 'meta.excalidraw', elements: SAMPLE }, { session: { header: { cwd: dir } } })
       expect(result.isError).toBe(false)
       expect(result.meta).toEqual({ path: join(dir, 'meta.excalidraw'), width: 280, height: 60 })
     } finally {
@@ -238,12 +224,14 @@ describe('dsh-diagram tool', () => {
     const badElements = new Context()
     await badElements.plugin(SystemPrompt)
     await badElements.plugin(ToolRuntime)
+  await badElements.plugin(NativeToolExecutor)
     await badElements.plugin(LocalFileSystem, { cwd: dir })
     await expect(badElements.plugin(tool, { maxElements: 0 }))
       .rejects.toMatchObject({ message: 'tool-diagram: maxElements must be a positive integer' })
     const badMeta = new Context()
     await badMeta.plugin(SystemPrompt)
     await badMeta.plugin(ToolRuntime)
+  await badMeta.plugin(NativeToolExecutor)
     await badMeta.plugin(LocalFileSystem, { cwd: dir })
     await expect(badMeta.plugin(tool, { maxMetaBytes: -1 }))
       .rejects.toMatchObject({ message: 'tool-diagram: maxMetaBytes must be a positive integer' })

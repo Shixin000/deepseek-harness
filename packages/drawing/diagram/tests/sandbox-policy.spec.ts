@@ -12,19 +12,20 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import Loader from '@deepseek-ai/cordis-plugin-loader'
 import Include from '@deepseek-ai/cordis-plugin-include'
-import { ToolCallId } from '@deepseek-ai/dsh-llm'
 import { SESSION_FORMAT_VERSION, Session, SessionId } from '@deepseek-ai/dsh-session'
 import AgentRegistry from '@deepseek-ai/dsh-agent'
 import type { Agent } from '@deepseek-ai/dsh-agent'
-import { unsupportedInbox } from '@deepseek-ai/dsh-agent-loop-testkit'
+import { unsupportedInbox, unsupportedModel } from '@deepseek-ai/dsh-agent-loop-testkit'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
+import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
 import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
 import SandboxPolicyService from '@deepseek-ai/dsh-sandbox-policy'
 import SandboxedFileSystem from '@deepseek-ai/dsh-fs-sandbox'
 import * as Diagram from '@deepseek-ai/dsh-diagram'
 import { assertWorkspaceOutsideTemp, outsideTempWorkspaceParent } from '../../../../scripts/snapshot-workspace-parent.ts'
 import { loaderInternalStub } from './loader-module-stub.ts'
+import { executeTool } from './execute-tool.ts'
 
 let base: string | undefined
 let context: Context | undefined
@@ -48,7 +49,7 @@ function agent(ctx: Context, cwd: string): Agent {
     isSeeded: false,
   })
   const value: Agent = {
-    id, options: {}, session, inbox: unsupportedInbox(),
+    id, options: {}, session, model: unsupportedModel(), inbox: unsupportedInbox(),
     status: 'idle', ctx: scope.ctx,
     followup: () => {}, steer: () => {}, inject: () => {}, send: () => {}, cancel() {},
     runMaintenance: task => task(new AbortController().signal),
@@ -76,6 +77,7 @@ async function boot(): Promise<{ ctx: Context; workspace: string; launch: string
     "- name: '@deepseek-ai/dsh-agent'",
     "- name: '@deepseek-ai/dsh-system-prompt'",
     "- name: '@deepseek-ai/dsh-tools'",
+    "- name: '@deepseek-ai/dsh-tool-executor-native'",
     "- name: '@deepseek-ai/dsh-session-projection'",
     "- name: '@deepseek-ai/dsh-sandbox-policy'",
     '  config:',
@@ -97,6 +99,7 @@ async function boot(): Promise<{ ctx: Context; workspace: string; launch: string
     ['@deepseek-ai/dsh-agent', AgentRegistry],
     ['@deepseek-ai/dsh-system-prompt', SystemPrompt],
     ['@deepseek-ai/dsh-tools', ToolRuntime],
+    ['@deepseek-ai/dsh-tool-executor-native', NativeToolExecutor],
     ['@deepseek-ai/dsh-session-projection', SessionProjectionRegistry],
     ['@deepseek-ai/dsh-sandbox-policy', SandboxPolicyService],
     ['@deepseek-ai/dsh-fs-sandbox', SandboxedFileSystem],
@@ -122,13 +125,7 @@ describe('dsh-diagram writes under a confining filesystem', () => {
   it('writes into the calling session workspace, not the deployment fallback root', async () => {
     const { ctx, workspace, launch } = await boot()
     const owner = agent(ctx, workspace)
-    const result = await ctx.tools.execute({
-      signal: new AbortController().signal,
-      callId: ToolCallId('call-sbx-session'),
-      name: 'diagram',
-      arguments: { file: 'flow.excalidraw', elements: SHAPES },
-      agent: owner,
-    })
+    const result = await executeTool(ctx, 'call-sbx-session', 'diagram', { file: 'flow.excalidraw', elements: SHAPES }, owner)
     expect(result.isError).toBe(false)
     expect(await documentType(join(workspace, 'flow.excalidraw'))).toBe('excalidraw')
     expect(existsSync(join(launch, 'flow.excalidraw'))).toBe(false)
@@ -138,13 +135,7 @@ describe('dsh-diagram writes under a confining filesystem', () => {
     const { ctx, workspace } = await boot()
     const owner = agent(ctx, workspace)
     const escape = join(base as string, 'escape.excalidraw')
-    const result = await ctx.tools.execute({
-      signal: new AbortController().signal,
-      callId: ToolCallId('call-sbx-escape'),
-      name: 'diagram',
-      arguments: { file: escape, elements: SHAPES },
-      agent: owner,
-    })
+    const result = await executeTool(ctx, 'call-sbx-escape', 'diagram', { file: escape, elements: SHAPES }, owner)
     expect(result.isError).toBe(true)
     expect(resultText(result)).toContain('file access denied')
     expect(existsSync(escape)).toBe(false)
@@ -152,12 +143,7 @@ describe('dsh-diagram writes under a confining filesystem', () => {
 
   it('resolves an agentless call against the configured fallback root', async () => {
     const { ctx, launch } = await boot()
-    const result = await ctx.tools.execute({
-      signal: new AbortController().signal,
-      callId: ToolCallId('call-sbx-agentless'),
-      name: 'diagram',
-      arguments: { file: 'flow.excalidraw', elements: SHAPES },
-    })
+    const result = await executeTool(ctx, 'call-sbx-agentless', 'diagram', { file: 'flow.excalidraw', elements: SHAPES })
     expect(result.isError).toBe(false)
     expect(await documentType(join(launch, 'flow.excalidraw'))).toBe('excalidraw')
   })

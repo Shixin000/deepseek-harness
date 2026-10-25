@@ -8,12 +8,11 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
+import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
 import { LocalFileSystem } from '@deepseek-ai/dsh-fs-local'
-import { ToolCallId } from '@deepseek-ai/dsh-llm'
 import * as tool from '../src/index.ts'
 import { presentReadCall, summarizeDocument } from '../src/read-tool.ts'
-
-const testToolSignal = new AbortController().signal
+import { executeTool } from './execute-tool.ts'
 
 let dir: string
 let ctx: Context
@@ -23,6 +22,7 @@ beforeEach(async () => {
   ctx = new Context()
   await ctx.plugin(SystemPrompt)
   await ctx.plugin(ToolRuntime)
+  await ctx.plugin(NativeToolExecutor)
   await ctx.plugin(LocalFileSystem, { cwd: dir })
   await ctx.plugin(tool)
 })
@@ -34,13 +34,7 @@ afterEach(async () => {
 
 let callCounter = 0
 function callRead(file: string) {
-  return ctx.tools.execute({
-    signal: testToolSignal,
-    callId: ToolCallId(`read-${++callCounter}`),
-    name: 'diagram_read',
-    arguments: { file },
-    agent: { session: { header: { cwd: dir } } } as never,
-  })
+  return executeTool(ctx, `read-${++callCounter}`, 'diagram_read', { file }, { session: { header: { cwd: dir } } })
 }
 
 function text(result: { content: { type: string; text?: string }[] }): string {
@@ -229,12 +223,7 @@ describe('diagram_read tool', () => {
 
   it('resolves a relative path without a session cwd when called without an agent', async () => {
     await writeFile(join(dir, 'flow.excalidraw'), DOCUMENT)
-    const result = await ctx.tools.execute({
-      signal: testToolSignal,
-      callId: ToolCallId('read-no-agent'),
-      name: 'diagram_read',
-      arguments: { file: 'flow.excalidraw' },
-    })
+    const result = await executeTool(ctx, 'read-no-agent', 'diagram_read', { file: 'flow.excalidraw' })
     expect(result.isError).toBe(false)
   })
 

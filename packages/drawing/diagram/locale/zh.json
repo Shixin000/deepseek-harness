@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "图表工具",
+    "description": "按形状规格生成 Excalidraw 图表，并把已有图表读回为有界的结构汇总。"
+  }
+}

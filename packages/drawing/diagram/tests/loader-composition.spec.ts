@@ -9,16 +9,18 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import Loader from '@deepseek-ai/cordis-plugin-loader'
 import Include from '@deepseek-ai/cordis-plugin-include'
-import { ToolCallId } from '@deepseek-ai/dsh-llm'
 import { Session, SessionId } from '@deepseek-ai/dsh-session'
 import AgentRegistry from '@deepseek-ai/dsh-agent'
 import type { Agent } from '@deepseek-ai/dsh-agent'
-import { unsupportedInbox } from '@deepseek-ai/dsh-agent-loop-testkit'
+import { unsupportedInbox, unsupportedModel } from '@deepseek-ai/dsh-agent-loop-testkit'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
+import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
+import * as NativeToolExecutor from '@deepseek-ai/dsh-tool-executor-native'
 import LocalFileSystem from '@deepseek-ai/dsh-fs-local'
 import * as Diagram from '@deepseek-ai/dsh-diagram'
 import { loaderInternalStub } from './loader-module-stub.ts'
+import { executeTool } from './execute-tool.ts'
 
 let root: string | undefined
 let context: Context | undefined
@@ -35,7 +37,7 @@ function agent(ctx: Context): Agent {
   const id = SessionId('diagram-loader-agent')
   const session = Session.create(id)
   const value: Agent = {
-    id, options: {}, session, inbox: unsupportedInbox(),
+    id, options: {}, session, model: unsupportedModel(), inbox: unsupportedInbox(),
     status: 'idle', ctx: scope.ctx,
     followup: () => {}, steer: () => {}, inject: () => {}, send: () => {}, cancel() {},
     runMaintenance: task => task(new AbortController().signal),
@@ -56,6 +58,8 @@ async function boot(): Promise<Context> {
     "- name: '@deepseek-ai/dsh-agent'",
     "- name: '@deepseek-ai/dsh-system-prompt'",
     "- name: '@deepseek-ai/dsh-tools'",
+    "- name: '@deepseek-ai/dsh-tool-executor-native'",
+    "- name: '@deepseek-ai/dsh-session-projection'",
     "- name: '@deepseek-ai/dsh-fs-local'",
     '  config:',
     `    cwd: ${root}`,
@@ -74,6 +78,8 @@ async function boot(): Promise<Context> {
     ['@deepseek-ai/dsh-agent', AgentRegistry],
     ['@deepseek-ai/dsh-system-prompt', SystemPrompt],
     ['@deepseek-ai/dsh-tools', ToolRuntime],
+    ['@deepseek-ai/dsh-tool-executor-native', NativeToolExecutor],
+    ['@deepseek-ai/dsh-session-projection', SessionProjectionRegistry],
     ['@deepseek-ai/dsh-fs-local', LocalFileSystem],
     ['@deepseek-ai/dsh-diagram', Diagram],
   ])
@@ -87,20 +93,14 @@ describe('dsh-diagram loader composition', () => {
   it('enforces the maxElements cap configured through cordis.yml', async () => {
     const ctx = await boot()
     const owner = agent(ctx)
-    const result = await ctx.tools.execute({
-      signal: new AbortController().signal,
-      callId: ToolCallId('call-loader-cap'),
-      name: 'diagram',
-      arguments: {
-        file: 'flow.excalidraw',
-        elements: [
-          { kind: 'rect', x: 0, y: 0, w: 10, h: 10 },
-          { kind: 'rect', x: 20, y: 0, w: 10, h: 10 },
-          { kind: 'rect', x: 40, y: 0, w: 10, h: 10 },
-        ],
-      },
-      agent: owner,
-    })
+    const result = await executeTool(ctx, 'call-loader-cap', 'diagram', {
+      file: 'flow.excalidraw',
+      elements: [
+        { kind: 'rect', x: 0, y: 0, w: 10, h: 10 },
+        { kind: 'rect', x: 20, y: 0, w: 10, h: 10 },
+        { kind: 'rect', x: 40, y: 0, w: 10, h: 10 },
+      ],
+    }, owner)
     expect(result.isError).toBe(true)
     expect(resultText(result)).toContain('at most 2 shapes')
   })
@@ -108,19 +108,13 @@ describe('dsh-diagram loader composition', () => {
   it('accepts a spec within the configured cap and writes the document', async () => {
     const ctx = await boot()
     const owner = agent(ctx)
-    const result = await ctx.tools.execute({
-      signal: new AbortController().signal,
-      callId: ToolCallId('call-loader-ok'),
-      name: 'diagram',
-      arguments: {
-        file: 'flow.excalidraw',
-        elements: [
-          { kind: 'rect', x: 0, y: 0, w: 10, h: 10 },
-          { kind: 'arrow', points: [{ x: 20, y: 5 }, { x: 40, y: 5 }] },
-        ],
-      },
-      agent: owner,
-    })
+    const result = await executeTool(ctx, 'call-loader-ok', 'diagram', {
+      file: 'flow.excalidraw',
+      elements: [
+        { kind: 'rect', x: 0, y: 0, w: 10, h: 10 },
+        { kind: 'arrow', points: [{ x: 20, y: 5 }, { x: 40, y: 5 }] },
+      ],
+    }, owner)
     expect(result.isError).toBe(false)
     expect(resultText(result)).toContain('Wrote 2 shapes')
   })

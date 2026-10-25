@@ -49,7 +49,7 @@ const MAX_DECL_CHARS = 1200
  * into a manual. Every report also lists one line per standard prop seat of its
  * scope and one line per registered key, so the widest Session-scope slot
  * (`tool.call.toolview`, with the global and Session access seats) sets the
- * current 124; each keyed contribution to that slot spends one of them.
+ * current 124.
  */
 const MAX_ENTRY_LINES = 124
 

@@ -1,81 +1,15 @@
 {
   "formatVersion": 2,
   "roots": [
-    {
-      "key": "event:diagram/saved",
-      "kind": "event",
-      "event": "diagram/saved",
-      "surface": false,
-      "digest": "bfa9b4ef71ecd0a138acdd82088d8923929dd2a004aa48a7426e0165096006ef",
-      "schema": {
-        "root": 0,
-        "nodes": [
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "data",
-                "type": 1,
-                "optional": false
-              },
-              {
-                "name": "ignorable",
-                "type": 4,
-                "optional": true
-              },
-              {
-                "name": "seq",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "time",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "type",
-                "type": 5,
-                "optional": false
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "object",
-            "properties": [
-              {
-                "name": "elementCount",
-                "type": 2,
-                "optional": false
-              },
-              {
-                "name": "path",
-                "type": 3,
-                "optional": false
-              }
-            ],
-            "indices": []
-          },
-          {
-            "kind": "primitive",
-            "type": "number"
-          },
-          {
-            "kind": "primitive",
-            "type": "string"
-          },
-          {
-            "kind": "literal",
-            "value": true
-          },
-          {
-            "kind": "literal",
-            "value": "diagram/saved"
-          }
-        ]
-      }
-    }
+    {"key":"event:diagram/saved","kind":"event","event":"diagram/saved","surface":false,"digest":"bfa9b4ef71ecd0a138acdd82088d8923929dd2a004aa48a7426e0165096006ef"}
   ],
-  "types": []
+  "types": [],
+  "nodes": {
+    "0657d3ca5ac4e7bf": {"kind":"primitive","type":"number"},
+    "3b6875ec12d158f1": {"kind":"literal","value":"diagram/saved"},
+    "4cd48f3e5108bd6e": {"kind":"primitive","type":"string"},
+    "bfa9b4ef71ecd0a1": {"kind":"object","properties":[{"name":"data","type":"e01e1829ff3381bc","optional":false},{"name":"ignorable","type":"dacf3d5f3e4ff619","optional":true},{"name":"seq","type":"0657d3ca5ac4e7bf","optional":false},{"name":"time","type":"0657d3ca5ac4e7bf","optional":false},{"name":"type","type":"3b6875ec12d158f1","optional":false}],"indices":[]},
+    "dacf3d5f3e4ff619": {"kind":"literal","value":true},
+    "e01e1829ff3381bc": {"kind":"object","properties":[{"name":"elementCount","type":"0657d3ca5ac4e7bf","optional":false},{"name":"path","type":"4cd48f3e5108bd6e","optional":false}],"indices":[]}
+  }
 }
