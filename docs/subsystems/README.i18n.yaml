@@ -3,5 +3,5 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/subsystems/README.md
 /subsystems:
-  en: 11874024a62eea1b
-  zh: a49f8d1d2a32415f
+  en: 4f89c65c9f94cfb5
+  zh: 42e875ec9a9b330e

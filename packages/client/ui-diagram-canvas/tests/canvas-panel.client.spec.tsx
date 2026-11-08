@@ -5,7 +5,7 @@
 import { afterEach } from 'vitest'
 import { cleanup, fireEvent, render } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import { allowAllAccess, makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
+import { allowAllAccess, contextMenuHook, makeTranslate } from '@deepseek-ai/dsh-client-test-runtime'
 import type { GlobalStandardProps } from '@deepseek-ai/dsh-client-ui-slots'
 
 import { createCanvasStore } from '../src/client/canvas-store.ts'
@@ -63,6 +63,7 @@ function bench(initial: { open: boolean; path: string }) {
     t,
     useResource,
     usePanelInfo,
+    useContextMenu: contextMenuHook(),
     useSessionStatus: (() => undefined) as never,
     useSessionRetainInfo: (() => undefined) as never,
     useSessions: (() => []) as never,
